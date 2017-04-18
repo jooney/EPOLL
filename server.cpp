@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <pthread.h>
 #include <iostream>
 using namespace std;
 
@@ -20,12 +21,23 @@ using namespace std;
 #define LINE 1024
 #define BUFFER_SIZE 1024
 const char* msg = "I recv your msg: ";
-struct client_data
+
+struct task
 {
-	sockaddr_in cliaddr;
-	char* write_buf;
-	char buf[BUFFER_SIZE];
+	int fd;
+	struct task* next;
 };
+
+struct user_data
+{
+	int fd;
+	unsigned int n_size;
+	char line[LINE];
+};
+
+void* readtask(void* args);
+
+void* writetask(void* args);
 
 void setnonblocking(int sock)
 {
@@ -40,6 +52,13 @@ int main()
 
 	struct sockaddr_in servaddr, cliaddr;
 	struct epoll_event ev, events[1024];
+	pthread_t tid1, tid2;
+	pthread_mutex_t mutex;
+	pthread_cond_t cond;
+	struct task* next_task = NULL, *readhead = NULL,*readtail = NULL, *writehead = NULL;
+	struct user_data* rdata = NULL;
+	pthread_mutex_init(&mutex,NULL);
+	pthread_cond_init(&cond,NULL);
 	int connfd;
 	socklen_t clilen;
 	bzero(&servaddr,sizeof(servaddr));
@@ -62,9 +81,6 @@ int main()
 	epfd = epoll_create(256);
 	ev.data.fd = listenfd;
 	ev.events = EPOLLIN;
-	client_data* users = new client_data[USER_LIMIT];
-	int user_counter = 0;
-	//initialize user
 	epoll_ctl(epfd,EPOLL_CTL_ADD,listenfd,&ev);
 	char line[LINE],climsg[LINE];
 	int nread = 0, sockfd;
@@ -85,14 +101,15 @@ int main()
 				const char* str = inet_ntoa(cliaddr.sin_addr);
 				cout<<"connect from "<<str<<endl;
 				ev.data.fd = connfd;
-				ev.events = EPOLLIN ;
+				ev.events = EPOLLIN;
+				ev.events |= EPOLLET; //et mode
 				epoll_ctl(epfd,EPOLL_CTL_ADD,connfd,&ev);
 			}
 			else if (events[i].events & EPOLLIN)
 			{
 				if ( (sockfd = events[i].data.fd) <0) continue;
 				bzero(&climsg,sizeof(climsg));
-				if ( (nread = ::read(sockfd,climsg,LINE))<0)
+				if ( (nread = ::read(sockfd,climsg,5))<0) //test epoll LT mode
 				{
 					if (errno == ECONNRESET)
 					{
@@ -109,9 +126,9 @@ int main()
 					continue;
 				}
 				cout<<"recv info from client: "<<climsg<<endl;;
-				ev.data.fd = sockfd;
-				ev.events = EPOLLOUT;
-				epoll_ctl(epfd,EPOLL_CTL_MOD, sockfd, &ev);
+				//ev.data.fd = sockfd;
+				//ev.events = EPOLLOUT;
+				//epoll_ctl(epfd,EPOLL_CTL_MOD, sockfd, &ev);
 			}
 			else if (events[i].events & EPOLLOUT)
 			{
@@ -135,3 +152,11 @@ int main()
 	return 0;
 }
 
+void* readtask(void* args)
+{
+}
+
+
+void* writetask(void* args)
+{
+}
