@@ -1,11 +1,10 @@
-TARGET = test 
+TARGET: server client 
 LDFLAGS = -lpthread -lrt -llog4cplus
 INCLUDE = . 
 CFLAGS = -g 
 
 %.o:%.cpp
 	$(CXX) -I$(INCLUDE) -c -g $<  
-
 
 SOURCES = $(wildcard *.cpp)
 OBJS = $(patsubst %.cpp,%.o,$(SOURCES))
@@ -15,5 +14,5 @@ $(TARGET):$(OBJS)
 
 
 clean:
-	-rm test
+	-rm server client
 	-rm *.o
