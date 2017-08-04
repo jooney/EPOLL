@@ -1,7 +1,3 @@
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/epoll.h>
 #include <string.h>
 #include <assert.h>
 #include <fcntl.h>
@@ -10,7 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <pthread.h>
 #include <iostream>
 #include "server.h"
 #include <muduo/base/Logging.h>
