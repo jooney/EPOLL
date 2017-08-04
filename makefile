@@ -1,7 +1,7 @@
 TARGET =  server 
-MUDUO = /home/jjz/build/debug-install/lib
-LDFLAGS = -pthread -lrt -llog4cplus   $(MUDUO)/libmuduo_net.a  $(MUDUO)/libmuduo_base.a    
-INCLUDE = /home/jjz/build/debug-install/include 
+MUDUO = /home/jjz/git/build/debug-install/lib/
+LDFLAGS = -pthread -lrt   $(MUDUO)/libmuduo_net.a  $(MUDUO)/libmuduo_base.a    
+INCLUDE = /home/jjz/git/build/debug-install/include/ 
 CFLAGS = -g 
 
 #server: main.o server.o
