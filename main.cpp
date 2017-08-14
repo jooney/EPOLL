@@ -14,7 +14,7 @@ using namespace std;
 
 #define IP  "127.0.0.1"
 #define PORT 12345
-const char* g_file = NULL;
+const char* g_file = "testfile";
 void onConnection(const muduo::net::TcpConnectionPtr& conn)
 {
 	LOG_INFO<<"FileServer- "<<conn->peerAddress().toIpPort()<<" -> "
@@ -31,9 +31,11 @@ void onConnection(const muduo::net::TcpConnectionPtr& conn)
 			char buf[10];
 			size_t nread = ::fread(buf,1,sizeof(buf),fp);
 			conn->send(buf,static_cast<int>(nread));
+			LOG_INFO<<"file has been sent";
 		}
 		else
 		{
+			LOG_INFO<<"fp not valid";
 			conn->shutdown();
 			LOG_INFO<<"FileServer - no such file";
 		}
@@ -45,6 +47,7 @@ int main(int argc, char* argv[])
 	muduo::net::EventLoop loop;
 	muduo::net::InetAddress listenAddr(12345);
 	muduo::net::TcpServer server(&loop,listenAddr,"FileServer");
+	server.setConnectionCallback(onConnection);
 	server.start();
 	loop.loop();
 	return 0;
