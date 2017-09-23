@@ -1,7 +1,7 @@
-TARGET =  server 
+TARGET =  EventLoop 
 MUDUO = /home/jjz/git/build/debug-install/lib/
-LDFLAGS = -pthread -lrt   $(MUDUO)/libmuduo_net.a  $(MUDUO)/libmuduo_base.a    
-INCLUDE = /home/jjz/git/build/debug-install/include/ 
+LDFLAGS = -pthread -lrt  # $(MUDUO)/libmuduo_net.a  $(MUDUO)/libmuduo_base.a    
+INCLUDE = .  #/home/jjz/git/build/debug-install/include/ 
 CFLAGS = -g 
 
 #server: main.o server.o
@@ -16,7 +16,7 @@ CFLAGS = -g
 
 
 %.o:%.cpp
-	$(CXX) -I$(INCLUDE)  -c -g $< 
+	$(CXX) -I$(INCLUDE)  -c -g -std=c++11 $< 
 
 
 SOURCES = $(wildcard *.cpp)
