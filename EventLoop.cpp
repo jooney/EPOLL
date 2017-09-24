@@ -5,9 +5,10 @@
  *      Author: jjz
  */
 #include "EventLoop.h"
+#include "Channel.h"
 #include "iostream"
 #include <unistd.h>
-//#include <stdio.h>
+#include <assert.h>
 
 #define LOG_FUNC() printf("func here %s\n",__FUNCTION__)
 EventLoop::EventLoop()
@@ -29,5 +30,20 @@ void EventLoop::loop()
 	std::cout<<"EventLoop this loop stopped"<<std::endl;
 	_looping = false;
 
+}
+
+void EventLoop::updateChannel(Channel* channel)
+{
+	//fixme
+	assert(channel->ownerLoop() == this);
+	//poller_->updateChannel(channel);
+}
+
+bool EventLoop::hasChannel(Channel* channel)
+{
+	assert(channel->ownerLoop());
+	//fixme
+	//return poller_->hanChannel(channel);
+	return true;
 }
 

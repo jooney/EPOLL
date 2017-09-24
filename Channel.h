@@ -73,6 +73,9 @@ private:
 	EventCallback  _writeCallback;
 	EventCallback  _closeCallback;
 	EventCallback  _errorCallback;
+	bool   _eventHandling;
+	bool   _addedToLoop;
+	bool   _tied;
 };
 
 

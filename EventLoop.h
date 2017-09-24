@@ -8,12 +8,15 @@
 #ifndef EVENTLOOP_H_
 #define EVENTLOOP_H_
 #include "Thread.h"
+class Channel;
 class EventLoop
 {
 public:
 	EventLoop();
 	~EventLoop();
 	void loop();
+	void updateChannel(Channel* channel);
+	bool hasChannel(Channel* channel);
 	//void assertInLoopThread();
 	//static EventLoop* getEventLoopOfCurrentThread();
 
