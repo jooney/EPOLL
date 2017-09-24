@@ -8,6 +8,7 @@
 #include <iostream>
 #include <assert.h>
 
+
 namespace detail
 {
 	struct ThreadData
@@ -39,14 +40,14 @@ namespace detail
 	}
 }
 
-Thread::Thread(const ThreadFunc& func, const std::string& n)
+Thread::Thread(const ThreadFunc& func, const std::string& name)
 	:_started(false),
 	 _joined(false),
-	 _tid(0),
 	 _func(func),
-	 _name(n)
+	_name(name)
 {
 }
+
 
 Thread::~Thread()
 {

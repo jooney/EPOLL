@@ -5,5 +5,8 @@
  *      Author: jjz
  */
 #include "Channel.h"
+#include "EventLoop.h"
+
+const int Channel::kNoneEvent = 0;
 
 
