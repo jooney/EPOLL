@@ -25,6 +25,40 @@ public:
 	{
 		_readCallback = cb;
 	}
+	void setWriteCallback(const EventCallback& cb)
+	{
+		_writeCallback = cb;
+	}
+	void setCloseCallback(const EventCallback& cb)
+	{
+		_closeCallback = cb;
+	}
+
+	void setErrorCallback(const EventCallback& cb)
+	{
+		_errorCallback = cb;
+	}
+	int fd() const { return _fd; }
+	int events() const { return _events; }
+	void set_revents(int revt) { _revents = revt; } // used by pollers
+	  // int revents() const { return revents_; }
+	bool isNoneEvent() const { return _events == kNoneEvent; }
+	void enableReading() { _events |= kReadEvent; update(); }
+	void disableReading() { _events &= ~kReadEvent; update(); }
+	void enableWriting() { _events |= kWriteEvent; update(); }
+	void disableWriting() { _events &= ~kWriteEvent; update(); }
+	void disableAll() { _events = kNoneEvent; update(); }
+	bool isWriting() const { return _events & kWriteEvent; }
+	bool isReading() const { return _events & kReadEvent; }
+	// for Poller
+	int index() { return _index; }
+	void set_index(int idx) { _index = idx; }
+
+	// for debug
+	std::string reventsToString() const;
+	std::string eventsToString() const;
+	EventLoop* ownerLoop() { return _loop; }
+	void remove();
 private:
 	void update();
 	static const int kNoneEvent;
