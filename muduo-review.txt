@@ -1,0 +1,62 @@
+TcpConnection::TcpConnection(EventLoop* loop.....)
+{
+	设置channel_的回调函数
+	channel_setReadCallback(std::bind(&TcpConnection::handleRead,this,_1));
+	channel_setWriteCallback(std::bind(&TcpConnection::handleWrite,this));
+	channel_setCloseCallback(std::bind(&TcpConnection::handleClose,this));
+	.....
+}
+TcpConnection::handleRead()          ------>void muduo::net::defaultMessageCallback
+
+TcpConnection::handleRead() handleWrite() 都由Channel::handleEventWithGuard中收到 POLLIN,POLLOUT信号来回调
+
+
+
+
+
+
+
+
+
+Acceptor::Acceptor(EventLoop* loop,const InetAddress& listenAddr)
+{
+	acceptChannel_.setReadCallback(std::bind(&Acceptor::handleRead,this));
+	//Channel::handleEventWithGuard中收到POLLIN | POLLPRI | POLLRDHUP时回调Acceptor::handleRead()
+}
+void Acceptor::handleRead()
+{
+	if (newConnectionCallback_)
+		newConnectionCallback_(connfd,peerAddr);  ------->  调用TcpServer::newConnection
+}
+
+TcpServer::newConnection
+{
+	TcpConnectionPtr conn(new TcpConnection(ioLoop,connName,sockfd,localAddr,peerAddr));
+	//设置TcpConnection的回调函数
+	conn->setConnectionCallback(connectionCallback_);
+	conn->setMessageCallback(messageCallback_);
+	conn->setWriteCompleteCallback(writeCompleteCallback_);
+	ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished,conn));
+}
+TcpConnection::connectEstablished()
+{
+	connectionCallback_(shared_from_this());// -------------->调用了defaultConnectionCallback
+}
+
+
+
+
+
+
+
+void TcpServer::start()
+{
+	loop_runInLoop(std::bind(&Acceptor::listen,get_pointer(acceptor_)));
+}
+
+void Acceptor::listen()
+{
+	listening_ = true;
+	acceptSocket_.listen();
+	acceptChannel_.enableReading();
+}
