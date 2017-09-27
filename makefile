@@ -1,6 +1,6 @@
 TARGET =  EventLoop 
-MUDUO = /home/jjz/git/build/debug-install  #lib/
-LDFLAGS = -pthread -lrt  # $(MUDUO)/libmuduo_net.a  $(MUDUO)/libmuduo_base.a    
+MUDUO = /home/jjz/git/build/debug-install#lib/
+LDFLAGS = -pthread -lrt $(MUDUO)/lib/libmuduo_base.a  # $(MUDUO)/libmuduo_net.a  $(MUDUO)/libmuduo_base.a    
 INCLUDE = -I.  -IMUDUO/include/ 
 CFLAGS = -g 
 
