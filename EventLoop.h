@@ -25,6 +25,9 @@ public:
 	void updateChannel(Channel* channel);
 	bool hasChannel(Channel* channel);
 	static EventLoop* getEventLoopOfCurrentThread();
+	void assertInLoopThread()
+	{
+	}
 	//void assertInLoopThread();
 	//static EventLoop* getEventLoopOfCurrentThread();
 
