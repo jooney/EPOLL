@@ -4,6 +4,9 @@
 #include "muduo/base/Types.h"
 #include "InetAddress.h"
 #include "Callbacks.h"
+#include "Buffer.h"
+#include <memory>
+#include <boost/scoped_ptr.hpp>
 
 
 
