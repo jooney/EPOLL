@@ -7,9 +7,10 @@
 
 #ifndef CHANNEL_H_
 #define CHANNEL_H_
-#include "base/Timestamp.h"
+#include "muduo/base/Timestamp.h"
 #include <functional>
 class EventLoop;
+using namespace muduo;
 
 class Channel
 {
