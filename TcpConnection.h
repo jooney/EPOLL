@@ -8,6 +8,41 @@
 #include <memory>
 #include <boost/scoped_ptr.hpp>
 
+struct tcp_info;
+
+class Channel;
+class EventLoop;
+class Socket;
+
+class TcpConnection
+{
+	public:
+		TcpConnection(EventLoop* loop,
+				      const string& name,
+					  int sockfd,
+					  const InetAddress& localAddr,
+					  const InetAddress& peerAddr);
+		~TcpConnection();
+
+		EventLoop* getLoop() const {return _loop; }
+		const string& name() const {return _name;}
+		const InetAddress& localAddress() const {return _localAddr;}
+		const InetAddress& peerAddress() const {return _peerAddr;}
+		bool  connected() const {return _state == kConnected;}
+		bool  disconnected() const {return _state == kDisconnected;}
+
+		bool getTcpInfo(struct tcp_info*)const;
+		string getTcpInfoString() const;
 
 
+	private:
+		enum StateE {kDisconnected, kConnecting, kConnected, kDisconnecting};
+		void handleRead(Timestamp receiveTime);
+		EventLoop* _loop;
+		StateE _state;
+		const string _name;
+		bool  _reading;
+		const InetAddress _localAddr;
+		const InetAddress _peerAddr;
+};
 #endif
