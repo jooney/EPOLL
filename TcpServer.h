@@ -25,11 +25,17 @@ class TcpServer
 				  Option option = kNoReusePort);
 		~TcpServer();
 
-		const string& ipPort(); 
+		const string& ipPort()const {return _ipPort;}; 
+		const string& name() const {return _name;}
+		EventLoop* getLoop()const {return _loop;}
+		void setThreadInitCallback(const ThreadInitCallback& cb);
+		void start();
 	private:
 		EventLoop* _loop;    //the acceptor loop
 		const string _ipPort;
-		const string _name;
+		const string  _name;
+		AtomicInt32  _started;
+		ThreadInitCallback   _threadInitCallback;
 
 };
 

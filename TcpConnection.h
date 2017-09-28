@@ -38,6 +38,7 @@ class TcpConnection
 	private:
 		enum StateE {kDisconnected, kConnecting, kConnected, kDisconnecting};
 		void handleRead(Timestamp receiveTime);
+
 		EventLoop* _loop;
 		StateE _state;
 		const string _name;
