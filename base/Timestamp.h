@@ -1,11 +1,13 @@
 #ifndef MUDUO_BASE_TIMESTAMP_H
 #define MUDUO_BASE_TIMESTAMP_H
 
-#include <muduo/base/copyable.h>
-#include <muduo/base/Types.h>
+#include "copyable.h"
+#include "Types.h"
 
 #include <boost/operators.hpp>
 
+namespace muduo
+{
 
 ///
 /// Time stamp in UTC, in microseconds resolution.
@@ -41,8 +43,8 @@ class Timestamp : public muduo::copyable,
 
   // default copy/assignment/dtor are Okay
 
-  std::string toString() const;
-  std::string toFormattedString(bool showMicroseconds = true) const;
+  string toString() const;
+  string toFormattedString(bool showMicroseconds = true) const;
 
   bool valid() const { return microSecondsSinceEpoch_ > 0; }
 
@@ -110,4 +112,5 @@ inline Timestamp addTime(Timestamp timestamp, double seconds)
   return Timestamp(timestamp.microSecondsSinceEpoch() + delta);
 }
 
+}
 #endif  // MUDUO_BASE_TIMESTAMP_H

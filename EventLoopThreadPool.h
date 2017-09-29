@@ -11,7 +11,7 @@
 #ifndef MUDUO_NET_EVENTLOOPTHREADPOOL_H
 #define MUDUO_NET_EVENTLOOPTHREADPOOL_H
 
-#include <muduo/base/Types.h>
+#include "Types.h"
 
 #include <vector>
 #include <boost/function.hpp>

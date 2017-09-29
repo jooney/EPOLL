@@ -12,7 +12,7 @@
 
 #include <boost/bind.hpp>
 
-//using namespace muduo;
+using namespace muduo;
 //using namespace muduo::net;
 
 

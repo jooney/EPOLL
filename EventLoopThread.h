@@ -11,24 +11,23 @@
 #ifndef MUDUO_NET_EVENTLOOPTHREAD_H
 #define MUDUO_NET_EVENTLOOPTHREAD_H
 
-#include <muduo/base/Condition.h>
-#include <muduo/base/Mutex.h>
-#include <muduo/base/Thread.h>
+#include "Condition.h"
+#include "Mutex.h"
+#include "Thread.h"
 
 #include <boost/noncopyable.hpp>
-
-using namespace muduo;
 //namespace muduo
 //{
 //namespace net
 //{
 
+using namespace muduo;
 class EventLoop;
 
 class EventLoopThread : boost::noncopyable
 {
  public:
-  typedef std::function<void(EventLoop*)> ThreadInitCallback;
+  typedef boost::function<void(EventLoop*)> ThreadInitCallback;
 
   EventLoopThread(const ThreadInitCallback& cb = ThreadInitCallback(),
                   const string& name = string());

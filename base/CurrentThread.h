@@ -7,6 +7,9 @@
 #define MUDUO_BASE_CURRENTTHREAD_H
 
 #include <stdint.h>
+
+namespace muduo
+{
 namespace CurrentThread
 {
   // internal
@@ -44,4 +47,6 @@ namespace CurrentThread
 
   void sleepUsec(int64_t usec);
 }
+}
+
 #endif

@@ -7,8 +7,8 @@
 
 #ifndef EVENTLOOP_H_
 #define EVENTLOOP_H_
-#include "base/CurrentThread.h"
-#include "base/Timestamp.h"
+#include "CurrentThread.h"
+#include "Timestamp.h"
 #include <boost/scoped_ptr.hpp>
 #include <functional>
 #include <vector>
