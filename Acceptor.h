@@ -3,9 +3,11 @@
 
 #include <boost/noncopyable.hpp>
 #include <functional>
+#include "Channel.h"
 #include "Socket.h"
 class InetAddress;
 class EventLoop;
+
 class Acceptor : boost::noncopyable
 {
 	public:
@@ -19,9 +21,11 @@ class Acceptor : boost::noncopyable
 		bool listening() const {return _listenning;}
 		void listen();
 	private:
+		void handleRead();
 		EventLoop* _loop;
 		Socket _acceptSocket;
 		NewConnectionCallback newConnectionCB;
+		Channel   _acceptChannel;
 		bool _listenning;
 		int _idleFd;
 };

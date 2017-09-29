@@ -32,7 +32,7 @@ void TcpServer::start()
 	{
 		_threadPool->start(_threadInitCallback);
 		assert(!_acceptor->listening());
-	
+		_loop->runInLoop(std::bind(&Acceptor::listen,_acceptor.get()));	
 	}
 }
 void TcpServer::newConnection(int sockfd,const InetAddress &peerAddr)

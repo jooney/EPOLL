@@ -44,6 +44,16 @@ EventLoop::~EventLoop()
 	t_loopInThisThread = NULL;
 }
 
+//runs callback immediately in the loop threads
+//it wakes up the loop, and run cb
+void EventLoop::runInLoop(const Functor& cb)
+{
+	if (isInLoopThread())
+	{
+		cb();
+	}
+}
+
 void EventLoop::loop()
 {
 	assert(!_looping);

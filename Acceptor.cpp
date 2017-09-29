@@ -7,9 +7,15 @@
 Acceptor::Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport)
 	:_loop(loop),
 	_listenning(false),
-	_acceptSocket(sockets::createNonblockingOrDie(listenAddr.family())) 
+	_acceptSocket(sockets::createNonblockingOrDie(listenAddr.family())),
+	_acceptChannel(loop,_acceptSocket.fd())
 {
 	LOG_INFO<<"Acceptor::Acceptor()";
+	_acceptSocket.setReuseAddr(true);
+	_acceptSocket.setReusePort(reuseport);
+	_acceptSocket.bindAddress(listenAddr);
+	_acceptChannel.setReadCallback(std::bind(&Acceptor::handleRead,this));
+
 }
 
 Acceptor::~Acceptor()
@@ -19,9 +25,15 @@ Acceptor::~Acceptor()
 
 void Acceptor::listen()
 {
+	LOG_INFO<<"Acceptor::listen()";
 	_loop->assertInLoopThread();
 	_listenning = true;
 	_acceptSocket.listen();
 
+
+}
+
+void Acceptor::handleRead()
+{
 
 }

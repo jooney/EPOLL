@@ -23,7 +23,7 @@ public:
 	~EventLoop();
 	void loop();
 	void quit();
-	void runInLoop();
+	void runInLoop(const Functor& cb);
 	void updateChannel(Channel* channel);
 	bool hasChannel(Channel* channel);
 	static EventLoop* getEventLoopOfCurrentThread();
