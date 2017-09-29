@@ -4,6 +4,7 @@
  *  Created on: 2017Äê9ÔÂ23ÈÕ
  *      Author: jjz
  */
+#include "Logging.h"
 #include "EventLoop.h"
 #include "Channel.h"
 #include "iostream"
@@ -22,13 +23,13 @@ EventLoop* EventLoop::getEventLoopOfCurrentThread()
 EventLoop::EventLoop()
 	:_looping(false),
 	 _quit(false),
-	 _threadId(getpid()) //???CurrentTHread::tid()
+	 _threadId(CurrentThread::tid())
 {
-	LOG_FUNC();
-	printf("EventLoop created [%p] in thread[%d]\n",this,_threadId);
+	LOG_DEBUG << "EventLoop created"<<this<<" in thread "<<_threadId;
 	if (t_loopInThisThread)
 	{
-		printf("Anothrer EventLoop [%p] exists in this thread[%d]\n",t_loopInThisThread,_threadId);
+		LOG_FATAL << "Another EventLoop "<<t_loopInThisThread
+			      << " exists in this thread "<<_threadId;
 	}
 	else
 	{
@@ -38,16 +39,20 @@ EventLoop::EventLoop()
 
 EventLoop::~EventLoop()
 {
-	LOG_FUNC();
-	printf("EventLoop[%p] of thread[%d] destructs in thread\n",this,_threadId);
+	LOG_DEBUG<<"EventLoop "<<this<<" of thread "<<_threadId
+		     <<" destructs in thread "<<CurrentThread::tid();
 	t_loopInThisThread = NULL;
 }
 
 void EventLoop::loop()
 {
+	assert(!_looping);
+	assertInLoopThread();
 	_looping = true;
+	_quit = false;
+	LOG_TRACE <<"EventLoop "<<this<<" start looping";
 	::sleep(5);//::poll(NULL,0,5*1000);
-	std::cout<<"EventLoop this loop stopped"<<std::endl;
+	LOG_TRACE<<"EventLoop "<<this<<" stop looping";
 	_looping = false;
 
 }
@@ -55,6 +60,13 @@ void EventLoop::loop()
 void EventLoop::quit()
 {
 	_quit = true;
+}
+
+void EventLoop::abortNotInLoopThread()
+{
+	LOG_FATAL << "EventLoop::abortNotInLoopThread - EventLoop "<<this
+			  << " was created in _threadId = "<<_threadId
+			  << ", current thread id = " << CurrentThread::tid();
 }
 
 void EventLoop::updateChannel(Channel* channel)

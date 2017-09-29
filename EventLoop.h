@@ -10,10 +10,12 @@
 #include "CurrentThread.h"
 #include "Timestamp.h"
 #include <boost/scoped_ptr.hpp>
+#include <boost/noncopyable.hpp>
 #include <functional>
 #include <vector>
+using namespace muduo;
 class Channel;
-class EventLoop
+class EventLoop : boost::noncopyable
 {
 public:
 	typedef std::function<void()> Functor;	
@@ -27,13 +29,16 @@ public:
 	static EventLoop* getEventLoopOfCurrentThread();
 	void assertInLoopThread()
 	{
+		if (!isInLoopThread())
+		{
+			abortNotInLoopThread();
+		}
 	}
-	//void assertInLoopThread();
+	bool isInLoopThread() const {return _threadId == CurrentThread::tid();}
 	//static EventLoop* getEventLoopOfCurrentThread();
 
 private:
-	//bool isInLoopThread();
-	//void abortNotInLoopThread();
+	void abortNotInLoopThread();
 	typedef std::vector<Channel*> ChannelList;
 	bool _looping;
 	bool _quit;
