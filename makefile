@@ -1,5 +1,5 @@
-TARGET =  EventLoop 
-MUDUO =   /home/jjz/git/muduotest/base#/home/jjz/git/build/debug-install#lib/     /home/jjz/git/muduotest/base
+TARGET =  TcpServer 
+MUDUO =   /home/jjz/muduotest/base#/home/jjz/git/build/debug-install#lib/     /home/jjz/git/muduotest/base
 LDFLAGS = -pthread -lrt $(MUDUO)/libmuduo_base.a  # $(MUDUO)/libmuduo_net.a  $(MUDUO)/libmuduo_base.a    
 INCLUDE = -I.  -I$(MUDUO)/ 
 CFLAGS = -g
@@ -30,5 +30,5 @@ $(TARGET):$(OBJS)
 
 
 clean:
-	-rm EventLoop
+	-rm $(TARGET)
 	-rm *.o
