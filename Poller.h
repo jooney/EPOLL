@@ -1,3 +1,5 @@
+#ifndef __POLLER_H__
+#define __POLLER_H__
 #include "Timestamp.h"
 #include "EventLoop.h"
 #include <vector>
@@ -21,3 +23,4 @@ class Poller
 	private:
 		EventLoop* _ownerLoop;
 };
+#endif

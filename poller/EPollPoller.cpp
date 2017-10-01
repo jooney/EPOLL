@@ -20,3 +20,18 @@ EPollPoller::~EPollPoller()
 {
 	::close(_epollfd);
 }
+
+Timestamp EPollPoller::poll(int timeoutMs, ChannelList* activeChannels)
+{
+	Timestamp now(Timestamp::now());
+	return now;
+}
+
+void EPollPoller::updateChannel(Channel* channel)
+{
+
+}
+
+void EPollPoller::removeChannel(Channel* channel)
+{
+}

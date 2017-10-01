@@ -11,6 +11,9 @@ class EPollPoller : public Poller
 	public:
 		EPollPoller(EventLoop* loop);
 		virtual ~EPollPoller();
+		virtual Timestamp poll(int timeoutMs,ChannelList* activeChannels);
+		virtual void updateChannel(Channel* channel);
+		virtual void removeChannel(Channel* channel);
 	private:
 		static const int kInitEventListSize = 16;
 		typedef std::vector<struct epoll_event> EventList;
