@@ -16,6 +16,8 @@
 
 __thread EventLoop* t_loopInThisThread = 0;
 
+const int kPollTimeMs = 10000;
+
 EventLoop* EventLoop::getEventLoopOfCurrentThread()
 {
 	return t_loopInThisThread;
@@ -64,7 +66,11 @@ void EventLoop::loop()
 	_looping = true;
 	_quit = false;
 	LOG_TRACE <<"EventLoop "<<this<<" start looping";
-	::sleep(5);//::poll(NULL,0,5*1000);
+	while (!_quit)
+	{
+		_activeChannels.clear();
+	}
+	//::sleep(5);//::poll(NULL,0,5*1000);
 	LOG_TRACE<<"EventLoop "<<this<<" stop looping";
 	_looping = false;
 
