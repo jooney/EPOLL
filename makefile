@@ -6,7 +6,6 @@ CFLAGS = -g -std=c++11
 OBJS = Acceptor.o Buffer.o Channel.o EventLoop.o EventLoopThread.o EventLoopThreadPool.o InetAddress.o \
 	   Poller.o Socket.o SocketsOps.o TcpConnection.o TcpServer.o main.o DefaultPoller.o
 VPATH = .:poller
-
 $(TARGET):$(OBJS)
 	$(CXX) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
