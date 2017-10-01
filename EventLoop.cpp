@@ -7,6 +7,7 @@
 #include "Logging.h"
 #include "EventLoop.h"
 #include "Channel.h"
+#include "Poller.h"
 #include "iostream"
 #include <unistd.h>
 #include <assert.h>
@@ -23,7 +24,9 @@ EventLoop* EventLoop::getEventLoopOfCurrentThread()
 EventLoop::EventLoop()
 	:_looping(false),
 	 _quit(false),
-	 _threadId(CurrentThread::tid())
+	 _threadId(CurrentThread::tid()),
+	 _currentActiveChannel(NULL),
+	 _poller(Poller::newDefaultPoller(this))
 {
 	LOG_DEBUG << "EventLoop created"<<this<<" in thread "<<_threadId;
 	if (t_loopInThisThread)

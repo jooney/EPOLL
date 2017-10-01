@@ -1,19 +1,7 @@
 TARGET = libmuduo_base.a
-#MUDUO = /home/jjz/git/build/debug-install#lib/
-LDFLAGS = -pthread -lrt #$(MUDUO)/lib/libmuduo_base.a  # $(MUDUO)/libmuduo_net.a  $(MUDUO)/libmuduo_base.a    
-INCLUDE = -I.  #-IMUDUO/include/ 
+LDFLAGS = -pthread -lrt     
+INCLUDE = -I.
 CFLAGS = -g 
-
-#server: main.o server.o
-#	$(CXX) main.o server.o $(LDFLAGS) -o server
-#
-#main.o: main.cpp
-#	$(CXX) -c main.cpp -I$(INCLUDE) -o main.o
-#
-#server.o: server.cpp
-#	$(CXX) $(INCLUDE) -c server.cpp -o server.o
-
-
 
 %.o:%.cc%.h
 	$(CXX) $(INCLUDE)  -c -g -std=c++11 $< 
@@ -23,7 +11,7 @@ SOURCES = $(wildcard *.cc)
 OBJS = $(patsubst %.cc,%.o,$(SOURCES))
 
 $(TARGET):$(OBJS)
-	ar cr $(TARGET) $(OBJS)   #$(CXX) $(OBJS) -o $(TARGET) $(LDFLAGS)
+	ar cr $(TARGET) $(OBJS)
 
 
 

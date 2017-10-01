@@ -1,34 +1,18 @@
-TARGET =  EventLoop 
-MUDUO =   /home/jjz/git/muduotest/base#/home/jjz/git/build/debug-install#lib/     /home/jjz/git/muduotest/base
-LDFLAGS = -pthread -lrt $(MUDUO)/libmuduo_base.a  # $(MUDUO)/libmuduo_net.a  $(MUDUO)/libmuduo_base.a    
-INCLUDE = -I.  -I$(MUDUO)/ 
-CFLAGS = -g
-#DEFS = -UD__GXX_EXPERIMENTAL_CXX0X__
-#CFLAGS += $(DEFS) 
-
-#server: main.o server.o
-#	$(CXX) main.o server.o $(LDFLAGS) -o server
-#
-#main.o: main.cpp
-#	$(CXX) -c main.cpp -I$(INCLUDE) -o main.o
-#
-#server.o: server.cpp
-#	$(CXX) $(INCLUDE) -c server.cpp -o server.o
-
-
-
-%.o:%.cpp %.h
-	$(CXX) $(INCLUDE)  -c -g -std=c++11 $< 
-
-
-SOURCES = $(wildcard *.cpp)
-OBJS = $(patsubst %.cpp,%.o,$(SOURCES))
+TARGET = TcpServer 
+MUDUO = /home/jjz/muduotest/
+LDFLAGS = -pthread -lrt $(MUDUO)/base/libmuduo_base.a  # $(MUDUO)/libmuduo_net.a  $(MUDUO)/libmuduo_base.a    
+INCLUDE = -I. -I$(MUDUO)base 
+CFLAGS = -g -std=c++11
+OBJS = Acceptor.o Buffer.o Channel.o EventLoop.o EventLoopThread.o EventLoopThreadPool.o InetAddress.o \
+	   Poller.o Socket.o SocketsOps.o TcpConnection.o TcpServer.o main.o DefaultPoller.o
+VPATH = .:poller
 
 $(TARGET):$(OBJS)
 	$(CXX) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
-
+$(OBJS):%.o:%.cpp
+	$(CXX) -c $(INCLUDE) $(CFLAGS) $< -o $@
 
 clean:
-	-rm EventLoop
-	-rm *.o
+	-$(RM) $(TARGET)
+	-$(RM) $(OBJS)

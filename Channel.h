@@ -62,6 +62,7 @@ public:
 	void remove();
 private:
 	void update();
+	void handleEventWithGuard(Timestamp receiveTime);
 	static const int kNoneEvent;
 	static const int kReadEvent;
 	static const int kWriteEvent;

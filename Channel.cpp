@@ -39,5 +39,10 @@ void Channel::update()
 
 void Channel::handleEvent(Timestamp receiveTime)
 {
+	handleEventWithGuard(receiveTime);
+}
+
+void Channel::handleEventWithGuard(Timestamp receiveTime)
+{
 }
 

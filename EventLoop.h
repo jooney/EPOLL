@@ -15,6 +15,7 @@
 #include <vector>
 using namespace muduo;
 class Channel;
+class Poller;
 class EventLoop : boost::noncopyable
 {
 public:
@@ -46,6 +47,7 @@ private:
 	const pid_t   _threadId;
 	int _wakeupFd;
 //	boost::scoped_ptr<Channel> _wakeupChannel;
+	boost::scoped_ptr<Poller> _poller;
 	ChannelList _activeChannels;
 	Channel*    _currentActiveChannel;
 	std::vector<Functor> _pendingFunctors;

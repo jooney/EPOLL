@@ -3,7 +3,7 @@
 #include "EventLoop.h"
 #include "InetAddress.h"
 #include "SocketsOps.h"
-//using namespace sockets;
+
 Acceptor::Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport)
 	:_loop(loop),
 	_listenning(false),
@@ -29,6 +29,7 @@ void Acceptor::listen()
 	_loop->assertInLoopThread();
 	_listenning = true;
 	_acceptSocket.listen();
+	_acceptChannel.enableReading();
 
 
 }
