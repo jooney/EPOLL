@@ -69,6 +69,7 @@ void EventLoop::loop()
 	while (!_quit)
 	{
 		_activeChannels.clear();
+		_pollReturnTime = _poller->poll(kPollTimeMs,&_activeChannels);
 	}
 	//::sleep(5);//::poll(NULL,0,5*1000);
 	LOG_TRACE<<"EventLoop "<<this<<" stop looping";
@@ -91,8 +92,9 @@ void EventLoop::abortNotInLoopThread()
 void EventLoop::updateChannel(Channel* channel)
 {
 	//fixme
-	//assert(channel->ownerLoop() == this);
-	//poller_->updateChannel(channel);
+	assert(channel->ownerLoop() == this);
+	assertInLoopThread();
+	_poller->updateChannel(channel);
 }
 
 bool EventLoop::hasChannel(Channel* channel)

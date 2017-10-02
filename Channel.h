@@ -56,11 +56,12 @@ public:
 	void set_index(int idx) { _index = idx; }
 
 	// for debug
-	std::string reventsToString() const;
-	std::string eventsToString() const;
+	string reventsToString() const;
+	string eventsToString() const;
 	EventLoop* ownerLoop() { return _loop; }
 	void remove();
 private:
+	static string eventsToString(int fd, int ev);
 	void update();
 	void handleEventWithGuard(Timestamp receiveTime);
 	static const int kNoneEvent;

@@ -17,6 +17,10 @@ class Poller
 		virtual void removeChannel(Channel* channel) = 0;
 		virtual bool hasChannel(Channel*channel) const;
 		static Poller* newDefaultPoller(EventLoop* loop);
+		void assertInLoopThread() const
+		{
+			_ownerLoop->assertInLoopThread();
+		}
 	protected:
 		typedef std::map<int,Channel*>ChannelMap;
 		ChannelMap _channels;

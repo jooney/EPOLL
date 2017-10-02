@@ -45,6 +45,7 @@ private:
 	bool _quit;
 	//static EventLoop* t_loopInThisThread;
 	const pid_t   _threadId;
+	Timestamp     _pollReturnTime;
 	int _wakeupFd;
 //	boost::scoped_ptr<Channel> _wakeupChannel;
 	boost::scoped_ptr<Poller> _poller;
