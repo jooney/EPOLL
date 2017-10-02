@@ -58,6 +58,10 @@ void EPollPoller::fillActiveChannels(int numEvents,
 		Channel* channel = static_cast<Channel*>(_events[i].data.ptr);
 		int fd = channel->fd();
 		ChannelMap::const_iterator it = _channels.find(fd);
+		assert(it != _channels.end());
+		assert(it->second == channel);
+		channel->set_revents(_events[i].events);
+		activeChannels->push_back(channel);
 	}
 }
 void EPollPoller::updateChannel(Channel* channel)
@@ -81,6 +85,24 @@ void EPollPoller::updateChannel(Channel* channel)
 			assert(_channels[fd] == channel);
 		}
 		channel->set_index(kAdded);
+		update(EPOLL_CTL_ADD,channel);
+	}
+	else
+	{
+		//update existing one with EPOLL_CTL_MOD/DEL
+		int fd = channel->fd();
+		assert(_channels.find(fd) != _channels.end());
+		assert(_channels[fd] == channel);
+		assert(index == kAdded);
+		if (channel->isNoneEvent())
+		{
+			update(EPOLL_CTL_DEL,channel);
+			channel->set_index(kDeleted);
+		}
+		else
+		{
+			update(EPOLL_CTL_MOD,channel);
+		}
 	}
 
 }
@@ -98,6 +120,17 @@ void EPollPoller::update(int operation, Channel* channel)
 	int fd = channel->fd();
 	LOG_TRACE << "epoll_ctl op = "<<operationToString(operation)
 		<<" fd = "<<fd<<" event = ( "<<channel->eventsToString() << " )";
+	if (::epoll_ctl(_epollfd,operation,fd,&event)<0)
+	{
+		if (operation == EPOLL_CTL_DEL)
+		{
+			LOG_SYSERR<<"epoll_ctl op ="<<operationToString(operation)<<" fd ="<<fd;
+		}
+		else
+		{
+			LOG_SYSFATAL<<"epoll_ctl op="<<operationToString(operation)<<" fd ="<<fd;
+		}
+	}
 }
 
 const char* EPollPoller::operationToString(int op)

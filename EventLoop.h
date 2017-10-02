@@ -40,9 +40,11 @@ public:
 
 private:
 	void abortNotInLoopThread();
+	void printActiveChannels() const;
 	typedef std::vector<Channel*> ChannelList;
 	bool _looping;
 	bool _quit;
+	bool _eventHandling;
 	//static EventLoop* t_loopInThisThread;
 	const pid_t   _threadId;
 	Timestamp     _pollReturnTime;

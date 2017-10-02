@@ -4,6 +4,7 @@
  *  Created on: 2017Äê9ÔÂ24ÈÕ
  *      Author: jjz
  */
+#include "Logging.h"
 #include "Channel.h"
 #include "EventLoop.h"
 #include <poll.h>
@@ -45,11 +46,51 @@ void Channel::handleEvent(Timestamp receiveTime)
 
 void Channel::handleEventWithGuard(Timestamp receiveTime)
 {
+	_eventHandling = true;
+	LOG_TRACE << reventsToString();
+	if ( (_revents & POLLHUP) && !(_revents & POLLIN))
+	{
+		if (_closeCallback) 
+		{
+			_closeCallback();
+		}
+	}
+	if (_revents & POLLNVAL)
+	{
+		LOG_WARN << "fd = "<< _fd<< " Channel::handle_event() POLLNVAL";
+	}
+	if (_revents & (POLLERR | POLLNVAL))
+	{
+		if (_errorCallback)
+		{
+			_errorCallback();
+		}
+	}
+	if (_revents & (POLLIN | POLLPRI | POLLRDHUP))
+	{
+		if (_readCallback)
+		{
+			_readCallback(receiveTime);
+		}
+	}
+	if (_revents & POLLOUT)
+	{
+		if (_writeCallback)
+		{
+			_writeCallback();
+		}
+	}
+	_eventHandling = false;
 }
 
 string Channel::eventsToString() const
 {
 	return eventsToString(_fd,_events);
+}
+
+string Channel::reventsToString() const
+{
+	return eventsToString(_fd,_revents);
 }
 
 string Channel::eventsToString(int fd, int ev)

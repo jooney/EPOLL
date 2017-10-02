@@ -26,6 +26,7 @@ EventLoop* EventLoop::getEventLoopOfCurrentThread()
 EventLoop::EventLoop()
 	:_looping(false),
 	 _quit(false),
+	 _eventHandling(false),
 	 _threadId(CurrentThread::tid()),
 	 _currentActiveChannel(NULL),
 	 _poller(Poller::newDefaultPoller(this))
@@ -70,6 +71,20 @@ void EventLoop::loop()
 	{
 		_activeChannels.clear();
 		_pollReturnTime = _poller->poll(kPollTimeMs,&_activeChannels);
+		if (Logger::logLevel() <= Logger::TRACE)
+		{
+			printActiveChannels();
+		}
+		_eventHandling = true;
+		for (ChannelList::iterator it = _activeChannels.begin();
+			it != _activeChannels.end(); ++it)
+		{
+			_currentActiveChannel = *it;
+			_currentActiveChannel->handleEvent(_pollReturnTime);
+		}
+		_currentActiveChannel = NULL;
+		_eventHandling = false;
+
 	}
 	//::sleep(5);//::poll(NULL,0,5*1000);
 	LOG_TRACE<<"EventLoop "<<this<<" stop looping";
@@ -103,5 +118,15 @@ bool EventLoop::hasChannel(Channel* channel)
 	//fixme
 	//return poller_->hanChannel(channel);
 	return true;
+}
+
+void EventLoop::printActiveChannels() const
+{
+	for (ChannelList::const_iterator it = _activeChannels.begin();
+		it != _activeChannels.end();++it)
+	{
+		const Channel* ch = *it;
+		LOG_TRACE << "(" << ch->reventsToString() << ")";
+	}
 }
 
