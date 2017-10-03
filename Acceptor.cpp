@@ -36,5 +36,23 @@ void Acceptor::listen()
 
 void Acceptor::handleRead()
 {
+	_loop->assertInLoopThread();
+	InetAddress peerAddr;
+	int connfd = _acceptSocket.accept(&peerAddr);
+	if (connfd >= 0)
+	{
+		if (_newConnectionCB)
+		{
+			_newConnectionCB(connfd,peerAddr);
+		}
+		else
+		{
+			sockets::close(connfd);
+		}
+	}
+	else
+	{
+		LOG_SYSERR << "in Acceptor::handleRead";
+	}
 
 }

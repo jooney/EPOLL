@@ -16,7 +16,7 @@ class Acceptor : boost::noncopyable
 		~Acceptor();
 		void setNewConnectionCallback(const NewConnectionCallback& cb)
 		{
-			newConnectionCB = cb;
+			_newConnectionCB = cb;
 		}
 		bool listening() const {return _listenning;}
 		void listen();
@@ -24,7 +24,7 @@ class Acceptor : boost::noncopyable
 		void handleRead();
 		EventLoop* _loop;
 		Socket _acceptSocket;
-		NewConnectionCallback newConnectionCB;
+		NewConnectionCallback _newConnectionCB;
 		Channel   _acceptChannel;
 		bool _listenning;
 		int _idleFd;
