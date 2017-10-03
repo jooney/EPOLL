@@ -6,6 +6,7 @@
 #include "TcpConnection.h"
 #include <functional>
 #include <boost/noncopyable.hpp>
+#include <map>
 
 class Acceptor;
 class EventLoop;
@@ -38,10 +39,14 @@ class TcpServer : boost::noncopyable
 		EventLoop* _loop;    //the acceptor loop
 		boost::scoped_ptr<Acceptor> _acceptor;
 		std::shared_ptr<EventLoopThreadPool> _threadPool;
+		ConnectionCallback _connectionCallback;
 		const string _ipPort;
 		const string  _name;
 		AtomicInt32  _started;
+		int   _nextConnId;
 		ThreadInitCallback   _threadInitCallback;
+		typedef std::map<string,TcpConnectionPtr> ConnectionMap;
+		ConnectionMap _connections;
 
 };
 

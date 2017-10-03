@@ -3,6 +3,7 @@
 #include "Acceptor.h"
 #include "EventLoop.h"
 #include "EventLoopThreadPool.h"
+#include "SocketsOps.h"
 using namespace std::placeholders;
 
 TcpServer::TcpServer(EventLoop* loop,
@@ -12,6 +13,8 @@ TcpServer::TcpServer(EventLoop* loop,
 	:_loop(loop),
 	_ipPort(listenAddr.toIpPort()),
 	_name(nameArg),
+	_nextConnId(1),
+	_connectionCallback(defaultConnectionCallback),
 	_acceptor(new Acceptor(loop,listenAddr,option==kReusePort)),
 	_threadPool(new EventLoopThreadPool(loop,_name))
 {
@@ -35,7 +38,26 @@ void TcpServer::start()
 		_loop->runInLoop(std::bind(&Acceptor::listen,_acceptor.get()));	
 	}
 }
+
+//TcpServer.cpp _acceptor->setNewConnectCallback();
 void TcpServer::newConnection(int sockfd,const InetAddress &peerAddr)
 {
+	_loop->assertInLoopThread();
+	EventLoop* ioLoop = _threadPool->getNextLoop();
+	char buf[64];
+	snprintf(buf,sizeof(buf),"-%s#%d",_ipPort.c_str(),_nextConnId);
+	++_nextConnId;
+	string connName = _name + buf;
+	LOG_INFO << "TcpServer::newConnection [" << _name << "] - new connection [" << connName << "] from " << peerAddr.toIpPort();
+	InetAddress localAddr(sockets::getLocalAddr(sockfd));
+	TcpConnectionPtr conn(new TcpConnection(ioLoop,
+											connName,
+											sockfd,
+											localAddr,
+											peerAddr));
+	_connections[connName] = conn;
+	conn->setConnectionCallback(_connectionCallback);
+	ioLoop->runInLoop();
+
 
 }

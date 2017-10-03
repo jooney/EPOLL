@@ -33,17 +33,27 @@ class TcpConnection
 
 		bool getTcpInfo(struct tcp_info*)const;
 		string getTcpInfoString() const;
+		void connectEstablished();
+		void setConnectionCallback(const ConnectionCallback& cb)
+		{_connectionCallback = cb;}
 
 
 	private:
 		enum StateE {kDisconnected, kConnecting, kConnected, kDisconnecting};
 		void handleRead(Timestamp receiveTime);
+		void handleWrite();
+		void handleClose();
+		void handleError();
+		const char* stateToString() const;
 
 		EventLoop* _loop;
 		StateE _state;
 		const string _name;
 		bool  _reading;
+		boost::scoped_ptr<Socket>  _socket;
+		boost::scoped_ptr<Channel> _channel;
 		const InetAddress _localAddr;
 		const InetAddress _peerAddr;
+		ConnectionCallback   _connectionCallback;
 };
 #endif
