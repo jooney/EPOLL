@@ -7,14 +7,14 @@
 #include "Buffer.h"
 #include <memory>
 #include <boost/scoped_ptr.hpp>
-
+#include <boost/enable_shared_from_this.hpp>
 struct tcp_info;
 
 class Channel;
 class EventLoop;
 class Socket;
 
-class TcpConnection
+class TcpConnection 
 {
 	public:
 		TcpConnection(EventLoop* loop,
@@ -44,6 +44,7 @@ class TcpConnection
 		void handleWrite();
 		void handleClose();
 		void handleError();
+		void setState(StateE s) {_state = s;}
 		const char* stateToString() const;
 
 		EventLoop* _loop;

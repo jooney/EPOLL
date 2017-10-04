@@ -9,6 +9,7 @@
 #define CHANNEL_H_
 #include "Timestamp.h"
 #include <functional>
+#include <memory>
 class EventLoop;
 using namespace muduo;
 
@@ -39,6 +40,7 @@ public:
 	{
 		_errorCallback = cb;
 	}
+	void tie(const std::shared_ptr<void>&);
 	int fd() const { return _fd; }
 	int events() const { return _events; }
 	void set_revents(int revt) { _revents = revt; } // used by pollers
@@ -79,6 +81,7 @@ private:
 	bool   _eventHandling;
 	bool   _addedToLoop;
 	bool   _tied;
+	std::weak_ptr<void> _tie;
 };
 
 

@@ -33,6 +33,13 @@ Channel::~Channel()
 	assert(!_addedToLoop);
 	assert(!_loop->hasChannel(this));
 }
+
+void Channel::tie(const std::shared_ptr<void>& obj)
+{
+	_tie = obj;
+	_tied = true;
+}
+
 void Channel::update()
 {
 	_addedToLoop = true;
@@ -41,7 +48,19 @@ void Channel::update()
 
 void Channel::handleEvent(Timestamp receiveTime)
 {
-	handleEventWithGuard(receiveTime);
+	std::shared_ptr<void> guard;
+	if (_tied)
+	{
+		guard = _tie.lock();
+		if (guard)
+		{
+			handleEventWithGuard(receiveTime);
+		}
+	}
+	else
+	{
+		handleEventWithGuard(receiveTime);
+	}
 }
 
 void Channel::handleEventWithGuard(Timestamp receiveTime)

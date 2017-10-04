@@ -57,7 +57,7 @@ void TcpServer::newConnection(int sockfd,const InetAddress &peerAddr)
 											peerAddr));
 	_connections[connName] = conn;
 	conn->setConnectionCallback(_connectionCallback);
-	ioLoop->runInLoop();
+	ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished,conn));
 
 
 }

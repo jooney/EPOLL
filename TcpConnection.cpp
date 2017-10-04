@@ -41,6 +41,15 @@ TcpConnection::~TcpConnection()
 	assert(_state == kDisconnected);
 }
 
+void TcpConnection::connectEstablished()
+{
+	_loop->assertInLoopThread();
+	assert(_state == kConnecting);
+	setState(kConnected);	
+	_channel->tie(std::shared_ptr<TcpConnection>(this));
+	_channel->enableReading();
+	_connectionCallback(std::shared_ptr<TcpConnection>(this));//call callback.h defaultConnectionCallback(TcpConnectionPtr)
+}
 void TcpConnection::handleRead(Timestamp receiveTime)
 {
 
