@@ -25,6 +25,7 @@ Channel::Channel(EventLoop* loop, int fd)
 	_addedToLoop(false),
 	_tied(false)
 {
+	LOG_INFO << "Channel  loop: " << _loop;
 }
 
 Channel::~Channel()
@@ -34,7 +35,7 @@ Channel::~Channel()
 	assert(!_loop->hasChannel(this));
 }
 
-void Channel::tie(const std::shared_ptr<void>& obj)
+void Channel::tie(const boost::shared_ptr<void>& obj)
 {
 	_tie = obj;
 	_tied = true;
@@ -48,7 +49,7 @@ void Channel::update()
 
 void Channel::handleEvent(Timestamp receiveTime)
 {
-	std::shared_ptr<void> guard;
+	boost::shared_ptr<void> guard;
 	if (_tied)
 	{
 		guard = _tie.lock();

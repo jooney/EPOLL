@@ -38,7 +38,7 @@ Timestamp EPollPoller::poll(int timeoutMs, ChannelList* activeChannels)
 	int numEvents = ::epoll_wait(_epollfd,
 								&(*_events.begin()),
 								static_cast<int>(_events.size()), //initial size:16
-								timeoutMs); //timeout: 10000
+								-1); //timeout: 10000
 	int savedErrno = errno;
 	Timestamp now(Timestamp::now());
 	if (numEvents >0)

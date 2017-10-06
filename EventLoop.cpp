@@ -12,8 +12,6 @@
 #include <unistd.h>
 #include <assert.h>
 
-#define LOG_FUNC() printf("func here %s\n",__FUNCTION__)
-
 __thread EventLoop* t_loopInThisThread = 0;
 
 const int kPollTimeMs = 10000;

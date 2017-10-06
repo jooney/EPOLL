@@ -8,13 +8,15 @@ using namespace std::placeholders;
 
 TcpServer::TcpServer(EventLoop* loop,
 					 const InetAddress& listenAddr,
-					 const string& nameArg,
+					 const std::string nameArg,
 					 Option option)
 	:_loop(loop),
 	_ipPort(listenAddr.toIpPort()),
 	_name(nameArg),
+	_threadInitCallback(NULL),
 	_nextConnId(1),
 	_connectionCallback(defaultConnectionCallback),
+	_messageCallback(defaultMessageCallback),
 	_acceptor(new Acceptor(loop,listenAddr,option==kReusePort)),
 	_threadPool(new EventLoopThreadPool(loop,_name))
 {
@@ -25,7 +27,7 @@ TcpServer::TcpServer(EventLoop* loop,
 TcpServer::~TcpServer()
 {
 	_loop->assertInLoopThread();
-	LOG_TRACE<<"TcpServer::~TcpServer["<<_name<<"] destructing";
+	LOG_INFO<<"TcpServer::~TcpServer["<<_name<<"] destructing";
 }
 
 void TcpServer::start()
@@ -33,6 +35,7 @@ void TcpServer::start()
 	LOG_INFO<<"TcpServer::start()";
 	if (_started.getAndSet(1) == 0)
 	{
+		_threadInitCallback = NULL;
 		_threadPool->start(_threadInitCallback);
 		assert(!_acceptor->listening());
 		_loop->runInLoop(std::bind(&Acceptor::listen,_acceptor.get()));	
@@ -47,7 +50,7 @@ void TcpServer::newConnection(int sockfd,const InetAddress &peerAddr)
 	char buf[64];
 	snprintf(buf,sizeof(buf),"-%s#%d",_ipPort.c_str(),_nextConnId);
 	++_nextConnId;
-	string connName = _name + buf;
+	std::string connName = _name + buf;
 	LOG_INFO << "TcpServer::newConnection [" << _name << "] - new connection [" << connName << "] from " << peerAddr.toIpPort();
 	InetAddress localAddr(sockets::getLocalAddr(sockfd));
 	TcpConnectionPtr conn(new TcpConnection(ioLoop,
@@ -57,6 +60,7 @@ void TcpServer::newConnection(int sockfd,const InetAddress &peerAddr)
 											peerAddr));
 	_connections[connName] = conn;
 	conn->setConnectionCallback(_connectionCallback);
+	conn->setMessageCallback(_messageCallback);
 	ioLoop->runInLoop(std::bind(&TcpConnection::connectEstablished,conn));
 
 

@@ -17,6 +17,7 @@
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <string>
 
 using namespace muduo;
 //namespace muduo
@@ -33,7 +34,7 @@ class EventLoopThreadPool : boost::noncopyable
  public:
   typedef boost::function<void(EventLoop*)> ThreadInitCallback;
 
-  EventLoopThreadPool(EventLoop* baseLoop, const string& nameArg);
+  EventLoopThreadPool(EventLoop* baseLoop, const std::string nameArg);
   ~EventLoopThreadPool();
   void setThreadNum(int numThreads) { numThreads_ = numThreads; }
   void start(const ThreadInitCallback& cb = ThreadInitCallback());
@@ -50,13 +51,13 @@ class EventLoopThreadPool : boost::noncopyable
   bool started() const
   { return started_; }
 
-  const string& name() const
+  const std::string name() const
   { return name_; }
 
  private:
 
   EventLoop* baseLoop_;
-  string name_;
+  std::string name_;
   bool started_;
   int numThreads_;
   int next_;

@@ -19,7 +19,7 @@ using namespace muduo;
 //using namespace muduo::net;
 
 
-EventLoopThreadPool::EventLoopThreadPool(EventLoop* baseLoop, const string& nameArg)
+EventLoopThreadPool::EventLoopThreadPool(EventLoop* baseLoop, const std::string nameArg)
   : baseLoop_(baseLoop),
     name_(nameArg),
     started_(false),
@@ -50,7 +50,7 @@ void EventLoopThreadPool::start(const ThreadInitCallback& cb)
   }
   if (numThreads_ == 0 && cb)
   {
-    cb(baseLoop_);
+    //cb(baseLoop_); ????
   }
 }
 
