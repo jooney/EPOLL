@@ -32,7 +32,10 @@ Channel::~Channel()
 {
 	assert(!_eventHandling);
 	assert(!_addedToLoop);
-	assert(!_loop->hasChannel(this));
+	if (_loop->isInLoopThread())
+	{
+		assert(!_loop->hasChannel(this));
+	}
 }
 
 void Channel::tie(const boost::shared_ptr<void>& obj)
@@ -45,6 +48,13 @@ void Channel::update()
 {
 	_addedToLoop = true;
 	_loop->updateChannel(this);
+}
+
+void Channel::remove()
+{
+	assert(isNoneEvent());
+	_addedToLoop = false;
+	_loop->removeChannel(this);
 }
 
 void Channel::handleEvent(Timestamp receiveTime)

@@ -7,6 +7,7 @@
 
 #ifndef EVENTLOOP_H_
 #define EVENTLOOP_H_
+#include "Mutex.h"
 #include "CurrentThread.h"
 #include "Timestamp.h"
 #include <boost/scoped_ptr.hpp>
@@ -25,8 +26,11 @@ public:
 	void loop();
 	void quit();
 	void runInLoop(const Functor& cb);
+	void queueInLoop(const Functor& cb);
 	void updateChannel(Channel* channel);
+	void removeChannel(Channel* channel);
 	bool hasChannel(Channel* channel);
+	void wakeup();
 	static EventLoop* getEventLoopOfCurrentThread();
 	void assertInLoopThread()
 	{
@@ -41,10 +45,12 @@ public:
 private:
 	void abortNotInLoopThread();
 	void printActiveChannels() const;
+	void doPendingFunctors();
 	typedef std::vector<Channel*> ChannelList;
 	bool _looping;
 	bool _quit;
 	bool _eventHandling;
+	bool _callingPendingFunctors;
 	//static EventLoop* t_loopInThisThread;
 	const pid_t   _threadId;
 	Timestamp     _pollReturnTime;
@@ -53,6 +59,8 @@ private:
 	boost::scoped_ptr<Poller> _poller;
 	ChannelList _activeChannels;
 	Channel*    _currentActiveChannel;
+
+	mutable MutexLock    _mutex;
 	std::vector<Functor> _pendingFunctors;
 
 };

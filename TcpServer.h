@@ -37,11 +37,14 @@ class TcpServer : boost::noncopyable
 		void start();
 	private:
 		void newConnection(int sockfd,const InetAddress& peerAddr);
+		void removeConnection(const TcpConnectionPtr& conn);
+		void removeConnectionInLoop(const TcpConnectionPtr& conn);
 		EventLoop* _loop;    //the acceptor loop
 		const string _ipPort;
 		boost::scoped_ptr<Acceptor> _acceptor;
 		ConnectionCallback _connectionCallback;
 		MessageCallback    _messageCallback;
+		WriteCompleteCallback _writecompleteCB;
 		ThreadInitCallback   _threadInitCallback;
 		//const string  _name;
 		const std::string _name;

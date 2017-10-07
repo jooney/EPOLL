@@ -31,14 +31,25 @@ class TcpConnection : public boost::enable_shared_from_this<TcpConnection>
 		const InetAddress& peerAddress() const {return _peerAddr;}
 		bool  connected() const {return _state == kConnected;}
 		bool  disconnected() const {return _state == kDisconnected;}
+		void  shutdown();
+		void  send(const void* message, int len);
+		void  send(const StringPiece& message);
+		void  send(Buffer* message);
+		void  sendInLoop(const StringPiece& message);
+		void  sendInLoopEX(const void* message, size_t len);;
 
 		bool getTcpInfo(struct tcp_info*)const;
 		string getTcpInfoString() const;
 		void connectEstablished();
+		void connectDestroyed();
 		void setConnectionCallback(const ConnectionCallback& cb)
 		{_connectionCallback = cb;}
 		void setMessageCallback(const MessageCallback& cb)
 		{ _messageCallback = cb;}
+		void setCloseCallback(const CloseCallback& cb)
+		{ _closeCallback = cb;}
+		void setWriteCompleteCallback(const WriteCompleteCallback& cb)
+		{ _writecompleteCB = cb;}
 
 
 	private:
@@ -48,6 +59,7 @@ class TcpConnection : public boost::enable_shared_from_this<TcpConnection>
 		void handleClose();
 		void handleError();
 		void setState(StateE s) {_state = s;}
+		void shutdownInLoop();
 		const char* stateToString() const;
 
 		EventLoop* _loop;
@@ -60,6 +72,9 @@ class TcpConnection : public boost::enable_shared_from_this<TcpConnection>
 		const InetAddress _peerAddr;
 		ConnectionCallback   _connectionCallback;
 		MessageCallback      _messageCallback;
+		CloseCallback        _closeCallback;
+		WriteCompleteCallback  _writecompleteCB;
 		Buffer   _inputBuffer;
+		Buffer   _outputBuffer;
 };
 #endif

@@ -34,7 +34,7 @@ EPollPoller::~EPollPoller()
 
 Timestamp EPollPoller::poll(int timeoutMs, ChannelList* activeChannels)
 {
-	LOG_TRACE<<"fd total count "<<_channels.size();
+	LOG_INFO<<"fd total count "<<_channels.size();
 	int numEvents = ::epoll_wait(_epollfd,
 								&(*_events.begin()),
 								static_cast<int>(_events.size()), //initial size:16
@@ -43,7 +43,7 @@ Timestamp EPollPoller::poll(int timeoutMs, ChannelList* activeChannels)
 	Timestamp now(Timestamp::now());
 	if (numEvents >0)
 	{
-		LOG_TRACE<<numEvents<<" events happened";
+		LOG_INFO<<numEvents<<" events happened";
 		fillActiveChannels(numEvents,activeChannels);
 	}
 	return now;
@@ -69,7 +69,7 @@ void EPollPoller::updateChannel(Channel* channel)
 	Poller::assertInLoopThread();	
 	//if channel is new ,then the index = -1(Channel's constructor)
 	const int index = channel->index();
-	LOG_TRACE << "fd = " << channel->fd()<<" events = "<<channel->events()<<" index = "<<index;
+	LOG_INFO << "EPollPoller::updateChannel fd = " << channel->fd()<<" events = "<<channel->events()<<" index = "<<index;
 	if (index == kNew || index == kDeleted)
 	{
 		//a new one fd , add with EPOLL_CTL_ADD
@@ -109,6 +109,22 @@ void EPollPoller::updateChannel(Channel* channel)
 
 void EPollPoller::removeChannel(Channel* channel)
 {
+	Poller::assertInLoopThread();
+	int fd = channel->fd();
+	LOG_INFO << "EPollPoller::removeChannel fd = " <<fd;
+	assert(_channels.find(fd) != _channels.end());
+	assert(_channels[fd] == channel);
+	assert(channel->isNoneEvent());
+	int index = channel->index();
+	assert(index == kAdded || index == kDeleted);
+	size_t n = _channels.erase(fd);
+	(void) n;
+	assert(n == 1);
+	if (index == kAdded)
+	{
+		update(EPOLL_CTL_DEL, channel);
+	}
+	channel->set_index(kNew);
 }
 
 void EPollPoller::update(int operation, Channel* channel)
@@ -118,7 +134,7 @@ void EPollPoller::update(int operation, Channel* channel)
 	event.events = channel->events();
 	event.data.ptr = channel;
 	int fd = channel->fd();
-	LOG_TRACE << "epoll_ctl op = "<<operationToString(operation)
+	LOG_INFO <<"epoll_ctl op = "<<operationToString(operation)
 		<<" fd = "<<fd<<" event = ( "<<channel->eventsToString() << " )";
 	if (::epoll_ctl(_epollfd,operation,fd,&event)<0)
 	{

@@ -25,6 +25,7 @@ EventLoop::EventLoop()
 	:_looping(false),
 	 _quit(false),
 	 _eventHandling(false),
+	 _callingPendingFunctors(false),
 	 _threadId(CurrentThread::tid()),
 	 _currentActiveChannel(NULL),
 	 _poller(Poller::newDefaultPoller(this))
@@ -56,6 +57,10 @@ void EventLoop::runInLoop(const Functor& cb)
 	{
 		cb();
 	}
+	else
+	{
+		queueInLoop(cb);
+	}
 }
 
 void EventLoop::loop()
@@ -64,7 +69,7 @@ void EventLoop::loop()
 	assertInLoopThread();
 	_looping = true;
 	_quit = false;
-	LOG_TRACE <<"EventLoop "<<this<<" start looping";
+	LOG_INFO <<"EventLoop "<<this<<" start looping";
 	while (!_quit)
 	{
 		_activeChannels.clear();
@@ -82,11 +87,40 @@ void EventLoop::loop()
 		}
 		_currentActiveChannel = NULL;
 		_eventHandling = false;
-
+		doPendingFunctors();
 	}
 	//::sleep(5);//::poll(NULL,0,5*1000);
-	LOG_TRACE<<"EventLoop "<<this<<" stop looping";
+	LOG_INFO<<"EventLoop "<<this<<" stop looping";
 	_looping = false;
+
+}
+
+void EventLoop::queueInLoop(const Functor& cb)
+{
+	{
+		MutexLockGuard lock(_mutex);
+		_pendingFunctors.push_back(cb);
+	}
+	if (!isInLoopThread() || _callingPendingFunctors)
+	{
+		//fixme wakeup
+	}
+
+}
+
+void EventLoop::doPendingFunctors()
+{
+	std::vector<Functor> functors;
+	_callingPendingFunctors  = true;
+	{
+		MutexLockGuard lock(_mutex);
+		functors.swap(_pendingFunctors);
+	}
+	for (size_t i = 0; i< functors.size();++i)
+	{
+		functors[i]();
+	}
+	_callingPendingFunctors = false;
 
 }
 
@@ -102,6 +136,13 @@ void EventLoop::abortNotInLoopThread()
 			  << ", current thread id = " << CurrentThread::tid();
 }
 
+void EventLoop::wakeup()
+{
+	uint64_t one = 1;
+	//fixme
+//	ssize_t n = sockets::write();
+}
+
 void EventLoop::updateChannel(Channel* channel)
 {
 	//fixme
@@ -110,12 +151,22 @@ void EventLoop::updateChannel(Channel* channel)
 	_poller->updateChannel(channel);
 }
 
+void EventLoop::removeChannel(Channel* channel)
+{
+	assert(channel->ownerLoop() == this);
+	assertInLoopThread();
+	if (_eventHandling)
+	{
+		assert(_currentActiveChannel == channel || std::find(_activeChannels.begin(), _activeChannels.end(), channel) == _activeChannels.end());
+	}
+	_poller->removeChannel(channel);
+}
+
 bool EventLoop::hasChannel(Channel* channel)
 {
-//	assert(channel->ownerLoop());
-	//fixme
-	//return poller_->hanChannel(channel);
-	return true;
+	assert(channel->ownerLoop() == this);
+	assertInLoopThread();
+	return _poller->hasChannel(channel);
 }
 
 void EventLoop::printActiveChannels() const
