@@ -11,6 +11,11 @@ void defaultConnectionCallback(const TcpConnectionPtr& conn)
 	LOG_INFO  << conn->localAddress().toIpPort() <<" -> "
 		      << conn->peerAddress().toIpPort() << " is "
 			  << (conn->connected() ? "UP":"DOWN");
+	//if (conn->connected())
+	//{
+	//	conn->send(Timestamp::now().toFormattedString() + "\n");
+	//	conn->shutdown();
+	//}
 
 }
 
@@ -19,14 +24,14 @@ void defaultMessageCallback(const TcpConnectionPtr& conn,
 							Timestamp time)
 {
 	string msg(buf->retrieveAllAsString());
-	LOG_INFO << conn->name() << "discard " << msg.size()
-		     << " bytes received at " << time.toString();
+	LOG_INFO << conn->name() << " echo " << msg.size() << " bytes, "<< msg <<" bytes received at " << time.toString();
+	conn->send(msg);
 }
 
-void defaultWriteCompleteCallback(/*const TcpConnectionPtr& conn*/)
+void defaultWriteCompleteCallback(const TcpConnectionPtr& conn)
 
 {
-//	LOG_INFO << conn->localAddress().toIpPort() << "write complete to " << conn->peerAddress().toIpPort();
+	LOG_INFO << "write complete";
 }
 
 TcpConnection::TcpConnection(EventLoop* loop,
@@ -105,9 +110,13 @@ void TcpConnection::send(Buffer* buf)
 	{
 		if (_loop->isInLoopThread())
 		{
+			sendInLoopEX(buf->peek(), buf->readableBytes());
+			buf->retrieveAll();
 		}
 		else
 		{
+			_loop->runInLoop(std::bind(&TcpConnection::sendInLoop,
+						     this, buf->retrieveAllAsString()));
 		}
 	}
 }
@@ -119,11 +128,12 @@ void TcpConnection::sendInLoop(const StringPiece& message)
 
 void TcpConnection::sendInLoopEX(const void* data,size_t len)
 {
+	LOG_INFO << "TcpConnection::sendInLoopEx"; 
 	_loop->assertInLoopThread();
 	ssize_t nwrote = 0;
 	size_t remaining = len;
 	bool faultError = false;
-	if (_state = kDisconnected)
+	if (_state == kDisconnected)
 	{
 		LOG_INFO << "disconnected, give up writing";
 		return; 
@@ -131,12 +141,13 @@ void TcpConnection::sendInLoopEX(const void* data,size_t len)
 	if (!_channel->isWriting() && _outputBuffer.readableBytes())
 	{
 		nwrote = sockets::write(_channel->fd(),data,len);
+		LOG_INFO << "TcpConnection::sendInLoopEx: "<< nwrote << "bytes"; 
 		if (nwrote >= 0)
 		{
 			remaining = len - nwrote;
 			if (remaining == 0 && _writecompleteCB)
 			{
-				_loop->queueInLoop(std::bind(_writecompleteCB));
+				_loop->queueInLoop(std::bind(_writecompleteCB,shared_from_this()));
 			}
 		}
 		else
@@ -152,7 +163,18 @@ void TcpConnection::sendInLoopEX(const void* data,size_t len)
 			}
 		}
 	}
-	//fixme
+	assert(remaining <= len);
+	if (!faultError && remaining > 0)
+	{
+		LOG_INFO << "TcpConnection::sendInLoopEX remaining: " << remaining;
+//		size_t oldLen = _outputBuffer.readableBytes();
+		//fixme
+		_outputBuffer.append(static_cast<const char*>(data)+nwrote,remaining);
+		if (!_channel->isWriting())
+		{
+			_channel->enableWriting();
+		}
+	}
 }
 
 
@@ -191,6 +213,33 @@ void TcpConnection::handleRead(Timestamp receiveTime)
 
 void TcpConnection::handleWrite()
 {
+	_loop->assertInLoopThread();
+	if (_channel->isWriting())
+	{
+		ssize_t n = sockets::write(_channel->fd(),
+								  _outputBuffer.peek(),
+								  _outputBuffer.readableBytes());
+		if (n > 0)
+		{
+			_outputBuffer.retrieve(n);
+			if (_outputBuffer.readableBytes() == 0)
+			{
+				_channel->disableWriting();
+				if (_writecompleteCB)
+				{
+					_loop->queueInLoop(std::bind(_writecompleteCB,shared_from_this()));
+				}
+				if (_state == kDisconnecting)
+				{
+					shutdownInLoop();
+				}
+			}
+		}
+		else
+		{
+			LOG_SYSERR << "TcpConnection::handleWrite";
+		}
+	}
 }
 
 void TcpConnection::handleClose()
@@ -207,6 +256,9 @@ void TcpConnection::handleClose()
 
 void TcpConnection::handleError()
 {
+	int err = sockets::getSocketError(_channel->fd());
+	LOG_ERROR << "TcpConnection::handleError [" << _name
+		      << "] - SO_ERROR = " << err << " " << strerror_tl(err);
 }
 
 void TcpConnection::connectDestroyed()
