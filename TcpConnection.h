@@ -8,7 +8,9 @@
 #include <memory>
 #include <boost/scoped_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/any.hpp>
 #include <string>
+#include "Log.h"
 struct tcp_info;
 
 class Channel;
@@ -22,7 +24,7 @@ class TcpConnection : public boost::enable_shared_from_this<TcpConnection>
 				      const std::string name,
 					  int sockfd,
 					  const InetAddress& localAddr,
-					  const InetAddress& peerAddr);
+					  const InetAddress& peerAddr,ZQ::common::Log& log);
 		~TcpConnection();
 
 		EventLoop* getLoop() const {return _loop; }
@@ -50,6 +52,10 @@ class TcpConnection : public boost::enable_shared_from_this<TcpConnection>
 		{ _closeCallback = cb;}
 		void setWriteCompleteCallback(const WriteCompleteCallback& cb)
 		{ _writecompleteCB = cb;}
+		void setContext(const boost::any& context)
+		{ _context = context;}
+		const boost::any& getContext() const
+		{return _context;}
 
 
 	private:
@@ -76,5 +82,7 @@ class TcpConnection : public boost::enable_shared_from_this<TcpConnection>
 		WriteCompleteCallback  _writecompleteCB;
 		Buffer   _inputBuffer;
 		Buffer   _outputBuffer;
+		boost::any   _context;
+		ZQ::common::Log&   _log;
 };
 #endif

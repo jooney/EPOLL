@@ -1,15 +1,17 @@
 #include <iostream>
-#include "TcpServer.h"
+#include "ServerWrapper.h"
 #include "EventLoop.h"
+#include "FileLog.h"
 
 using namespace std;
 int main()
 {
 	std::string name = "TcpServer";
-	EventLoop loop;
+	ZQ::common::FileLog  serverlog("server.log", 7);
+	EventLoop loop(serverlog);
 	InetAddress listenAddr(2009);
-	TcpServer server(&loop,listenAddr,name);
-	server.start();
+	ServerWrapper wrapper(&loop,listenAddr,name,serverlog);
+	wrapper.start();
 	loop.loop();
 	return 0;
 }

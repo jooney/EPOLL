@@ -5,6 +5,7 @@
 #include <functional>
 #include "Channel.h"
 #include "Socket.h"
+#include "Log.h"
 class InetAddress;
 class EventLoop;
 
@@ -12,7 +13,7 @@ class Acceptor : boost::noncopyable
 {
 	public:
 		typedef std::function<void(int sockfd,const InetAddress&)>	NewConnectionCallback;
-		Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport);
+		Acceptor(EventLoop* loop, const InetAddress& listenAddr, ZQ::common::Log& log,bool reuseport);
 		~Acceptor();
 		void setNewConnectionCallback(const NewConnectionCallback& cb)
 		{
@@ -28,5 +29,6 @@ class Acceptor : boost::noncopyable
 		Channel   _acceptChannel;
 		bool _listenning;
 		int _idleFd;
+		ZQ::common::Log&   _log;
 };
 #endif

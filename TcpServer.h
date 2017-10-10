@@ -1,6 +1,7 @@
 #ifndef __TCPSERVER_H__
 #define __TCPSERVER_H__
 
+#include "Log.h"
 #include <string>
 #include "Atomic.h"
 #include "Types.h"
@@ -26,6 +27,7 @@ class TcpServer : boost::noncopyable
 		TcpServer(EventLoop* loop,
 				  const InetAddress& listenAddr,
 				  const std::string nameArg,
+				  ZQ::common::Log& log,
 				  Option option = kNoReusePort);
 		~TcpServer();
 
@@ -35,6 +37,13 @@ class TcpServer : boost::noncopyable
 		void setThreadInitCallback(const ThreadInitCallback& cb){_threadInitCallback = cb;}
 		std::shared_ptr<EventLoopThreadPool> threadPool(){return _threadPool;}
 		void start();
+		//for Wrapper call
+		void setConnectionCallback(const ConnectionCallback& cb)
+		{ _connectionCallback = cb;}
+		void setMessageCallback(const MessageCallback& cb)
+		{ _messageCallback = cb;}
+		void setWriteCompleteCallback(const WriteCompleteCallback& cb)
+		{ _writecompleteCB = cb;}
 	private:
 		void newConnection(int sockfd,const InetAddress& peerAddr);
 		void removeConnection(const TcpConnectionPtr& conn);
@@ -53,6 +62,7 @@ class TcpServer : boost::noncopyable
 		int   _nextConnId;
 		typedef std::map<std::string,TcpConnectionPtr> ConnectionMap;
 		ConnectionMap _connections;
+		ZQ::common::Log&  _log;
 
 };
 

@@ -16,9 +16,10 @@ using namespace muduo;
 //using namespace muduo::net;
 
 
-EventLoopThread::EventLoopThread(const ThreadInitCallback& cb,
+EventLoopThread::EventLoopThread(ZQ::common::Log& log,const ThreadInitCallback& cb,
                                  const string& name)
   : loop_(NULL),
+	_log(log),
     exiting_(false),
     thread_(boost::bind(&EventLoopThread::threadFunc, this), name),
     mutex_(),
@@ -57,7 +58,7 @@ EventLoop* EventLoopThread::startLoop()
 
 void EventLoopThread::threadFunc()
 {
-  EventLoop loop;
+  EventLoop loop(_log);
 
   if (callback_)
   {

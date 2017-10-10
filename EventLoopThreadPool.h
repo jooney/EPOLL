@@ -18,6 +18,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <string>
+#include "Log.h"
 
 using namespace muduo;
 //namespace muduo
@@ -34,7 +35,7 @@ class EventLoopThreadPool : boost::noncopyable
  public:
   typedef boost::function<void(EventLoop*)> ThreadInitCallback;
 
-  EventLoopThreadPool(EventLoop* baseLoop, const std::string nameArg);
+  EventLoopThreadPool(EventLoop* baseLoop, const std::string nameArg,ZQ::common::Log& log);
   ~EventLoopThreadPool();
   void setThreadNum(int numThreads) { numThreads_ = numThreads; }
   void start(const ThreadInitCallback& cb = ThreadInitCallback());
@@ -63,6 +64,7 @@ class EventLoopThreadPool : boost::noncopyable
   int next_;
   boost::ptr_vector<EventLoopThread> threads_;
   std::vector<EventLoop*> loops_;
+  ZQ::common::Log&        _log;
 };
 
 //}

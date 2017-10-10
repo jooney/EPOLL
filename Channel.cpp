@@ -15,7 +15,7 @@ const int Channel::kNoneEvent = 0;
 const int Channel::kReadEvent = POLLIN | POLLPRI;
 const int Channel::kWriteEvent = POLLOUT;
 
-Channel::Channel(EventLoop* loop, int fd)
+Channel::Channel(EventLoop* loop, int fd, ZQ::common::Log& log)
 	:_loop(loop),
 	_fd(fd),
 	_events(0),
@@ -23,9 +23,10 @@ Channel::Channel(EventLoop* loop, int fd)
 	_index(-1),
 	_eventHandling(false),
 	_addedToLoop(false),
-	_tied(false)
+	_tied(false),
+	_log(log)
 {
-	LOG_INFO << "Channel  loop: " << _loop;
+//	LOG_INFO << "Channel  loop: " << _loop;
 }
 
 Channel::~Channel()
@@ -87,7 +88,7 @@ void Channel::handleEventWithGuard(Timestamp receiveTime)
 	}
 	if (_revents & POLLNVAL)
 	{
-		LOG_WARN << "fd = "<< _fd<< " Channel::handle_event() POLLNVAL";
+	//	LOG_WARN << "fd = "<< _fd<< " Channel::handle_event() POLLNVAL";
 	}
 	if (_revents & (POLLERR | POLLNVAL))
 	{

@@ -12,6 +12,7 @@
 #include <memory>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include "Log.h"
 class EventLoop;
 using namespace muduo;
 
@@ -21,7 +22,7 @@ public:
 	typedef std::function<void()> EventCallback;
 	typedef std::function<void(Timestamp)> ReadEventCallback;
 	//typedef std::function<void()>
-	Channel(EventLoop* loop, int fd);
+	Channel(EventLoop* loop, int fd, ZQ::common::Log& log);
 	~Channel();
 
 	void handleEvent(Timestamp receiveTime);
@@ -84,6 +85,7 @@ private:
 	bool   _addedToLoop;
 	bool   _tied;
 	boost::weak_ptr<void> _tie;
+	ZQ::common::Log&      _log;
 };
 
 

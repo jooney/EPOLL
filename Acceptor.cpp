@@ -1,16 +1,17 @@
 #include "Acceptor.h"
-#include "Logging.h"
+//#include "Logging.h"
 #include "EventLoop.h"
 #include "InetAddress.h"
 #include "SocketsOps.h"
 
-Acceptor::Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reuseport)
+Acceptor::Acceptor(EventLoop* loop, const InetAddress& listenAddr, ZQ::common::Log& log,bool reuseport)
 	:_loop(loop),
 	_listenning(false),
 	_acceptSocket(sockets::createNonblockingOrDie(listenAddr.family())),
-	_acceptChannel(loop,_acceptSocket.fd())
+	_acceptChannel(loop,_acceptSocket.fd(),log),
+	_log(log)
 {
-	LOG_INFO<<"Acceptor::Acceptor()";
+//	LOG_INFO<<"Acceptor::Acceptor()";
 	_acceptSocket.setReuseAddr(true);
 	_acceptSocket.setReusePort(reuseport);
 	_acceptSocket.bindAddress(listenAddr);
@@ -20,12 +21,12 @@ Acceptor::Acceptor(EventLoop* loop, const InetAddress& listenAddr, bool reusepor
 
 Acceptor::~Acceptor()
 {
-	LOG_INFO<<"Acceptor::~Acceptor()";
+//	LOG_INFO<<"Acceptor::~Acceptor()";
 }
 
 void Acceptor::listen()
 {
-	LOG_INFO<<"Acceptor::listen()";
+	//LOG_INFO<<"Acceptor::listen()";
 	_loop->assertInLoopThread();
 	_listenning = true;
 	_acceptSocket.listen();
@@ -52,7 +53,7 @@ void Acceptor::handleRead()
 	}
 	else
 	{
-		LOG_SYSERR << "in Acceptor::handleRead";
+	//	LOG_SYSERR << "in Acceptor::handleRead";
 	}
 
 }

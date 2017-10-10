@@ -1,5 +1,5 @@
 #include "TcpServer.h"
-#include "Logging.h"
+//#include "Logging.h"
 #include "Acceptor.h"
 #include "EventLoop.h"
 #include "EventLoopThreadPool.h"
@@ -9,26 +9,30 @@ using namespace std::placeholders;
 TcpServer::TcpServer(EventLoop* loop,
 					 const InetAddress& listenAddr,
 					 const std::string nameArg,
+					 ZQ::common::Log& log,
 					 Option option)
 	:_loop(loop),
 	_ipPort(listenAddr.toIpPort()),
 	_name(nameArg),
+	_log(log),
 	_threadInitCallback(NULL),
 	_nextConnId(1),
 	_connectionCallback(defaultConnectionCallback),
 	_messageCallback(defaultMessageCallback),
 	_writecompleteCB(defaultWriteCompleteCallback),
-	_acceptor(new Acceptor(loop,listenAddr,option==kReusePort)),
-	_threadPool(new EventLoopThreadPool(loop,_name))
+	_acceptor(new Acceptor(loop,listenAddr,log,option==kReusePort)),
+	_threadPool(new EventLoopThreadPool(loop,_name,log))
 {
 	_acceptor->setNewConnectionCallback(std::bind(&TcpServer::newConnection,this,_1,_2));
-	LOG_INFO<<"TcpServer::TcpServer";
+	_log(ZQ::common::Log::L_DEBUG,CLOGFMT(TcpServer,"TcpServer"));
+//	LOG_INFO<<"TcpServer::TcpServer";
 }
 
 TcpServer::~TcpServer()
 {
 	_loop->assertInLoopThread();
-	LOG_INFO<<"TcpServer::~TcpServer["<<_name<<"] destructing";
+	_log(ZQ::common::Log::L_DEBUG,CLOGFMT(TcpServer,"~TcpServer"));
+	//LOG_INFO<<"TcpServer::~TcpServer["<<_name<<"] destructing";
 	ConnectionMap::iterator it;
 	for (it = _connections.begin(); it != _connections.end(); ++it)
 	{
@@ -41,7 +45,8 @@ TcpServer::~TcpServer()
 
 void TcpServer::start()
 {
-	LOG_INFO<<"TcpServer::start()";
+	//LOG_INFO<<"TcpServer::start()";
+	_log(ZQ::common::Log::L_DEBUG,CLOGFMT(TcpServer,"start()"));
 	if (_started.getAndSet(1) == 0)
 	{
 		_threadInitCallback = NULL;
@@ -60,13 +65,14 @@ void TcpServer::newConnection(int sockfd,const InetAddress &peerAddr)
 	snprintf(buf,sizeof(buf),"-%s#%d",_ipPort.c_str(),_nextConnId);
 	++_nextConnId;
 	std::string connName = _name + buf;
-	LOG_INFO << "TcpServer::newConnection [" << _name << "] - new connection [" << connName << "] from " << peerAddr.toIpPort();
+	_log(ZQ::common::Log::L_DEBUG,CLOGFMT(TcpServer,"newConnection from [%s:%d]"),_name.c_str(),peerAddr.toIpPort().c_str());
+//	LOG_INFO << "TcpServer::newConnection [" << _name << "] - new connection [" << connName << "] from " << peerAddr.toIpPort();
 	InetAddress localAddr(sockets::getLocalAddr(sockfd));
 	TcpConnectionPtr conn(new TcpConnection(ioLoop,
 											connName,
 											sockfd,
 											localAddr,
-											peerAddr));
+											peerAddr,_log));
 	_connections[connName] = conn;
 	conn->setConnectionCallback(_connectionCallback);
 	conn->setMessageCallback(_messageCallback);
@@ -83,8 +89,9 @@ void TcpServer::removeConnection(const TcpConnectionPtr& conn)
 void TcpServer::removeConnectionInLoop(const TcpConnectionPtr& conn)
 {
 	_loop->assertInLoopThread();
-	LOG_INFO << "TcpServer::removeConnectionInLoop [" << _name
-		     << "] - connection " << conn->name();
+	_log(ZQ::common::Log::L_DEBUG,CLOGFMT(TcpServer,"removeConnection: [%s]"),conn->name().c_str());
+//	LOG_INFO << "TcpServer::removeConnectionInLoop [" << _name
+//		     << "] - connection " << conn->name();
 	size_t n = _connections.erase(conn->name());
 	(void)n ;  //?????
 	assert(n == 1);

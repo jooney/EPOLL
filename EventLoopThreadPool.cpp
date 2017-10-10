@@ -19,12 +19,13 @@ using namespace muduo;
 //using namespace muduo::net;
 
 
-EventLoopThreadPool::EventLoopThreadPool(EventLoop* baseLoop, const std::string nameArg)
+EventLoopThreadPool::EventLoopThreadPool(EventLoop* baseLoop, const std::string nameArg,ZQ::common::Log& log)
   : baseLoop_(baseLoop),
     name_(nameArg),
     started_(false),
     numThreads_(0),
-    next_(0)
+    next_(0),
+	_log(log)
 {
 }
 
@@ -44,7 +45,7 @@ void EventLoopThreadPool::start(const ThreadInitCallback& cb)
   {
     char buf[name_.size() + 32];
     snprintf(buf, sizeof buf, "%s%d", name_.c_str(), i);
-    EventLoopThread* t = new EventLoopThread(cb, buf);
+    EventLoopThread* t = new EventLoopThread(_log,cb, buf);
     threads_.push_back(t);
     loops_.push_back(t->startLoop());
   }

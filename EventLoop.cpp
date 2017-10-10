@@ -4,7 +4,7 @@
  *  Created on: 2017Äê9ÔÂ23ÈÕ
  *      Author: jjz
  */
-#include "Logging.h"
+//#include "Logging.h"
 #include "EventLoop.h"
 #include "Channel.h"
 #include "Poller.h"
@@ -21,20 +21,21 @@ EventLoop* EventLoop::getEventLoopOfCurrentThread()
 	return t_loopInThisThread;
 }
 
-EventLoop::EventLoop()
+EventLoop::EventLoop(ZQ::common::Log& log)
 	:_looping(false),
 	 _quit(false),
 	 _eventHandling(false),
 	 _callingPendingFunctors(false),
 	 _threadId(CurrentThread::tid()),
 	 _currentActiveChannel(NULL),
-	 _poller(Poller::newDefaultPoller(this))
+	 _poller(Poller::newDefaultPoller(this)),
+	 _log(log)
 {
-	LOG_DEBUG << "EventLoop created"<<this<<" in thread "<<_threadId;
+	//LOG_DEBUG << "EventLoop created"<<this<<" in thread "<<_threadId;
 	if (t_loopInThisThread)
 	{
-		LOG_FATAL << "Another EventLoop "<<t_loopInThisThread
-			      << " exists in this thread "<<_threadId;
+	//	LOG_FATAL << "Another EventLoop "<<t_loopInThisThread
+	//		      << " exists in this thread "<<_threadId;
 	}
 	else
 	{
@@ -44,8 +45,8 @@ EventLoop::EventLoop()
 
 EventLoop::~EventLoop()
 {
-	LOG_DEBUG<<"EventLoop "<<this<<" of thread "<<_threadId
-		     <<" destructs in thread "<<CurrentThread::tid();
+//	LOG_DEBUG<<"EventLoop "<<this<<" of thread "<<_threadId
+//		     <<" destructs in thread "<<CurrentThread::tid();
 	t_loopInThisThread = NULL;
 }
 
@@ -69,15 +70,15 @@ void EventLoop::loop()
 	assertInLoopThread();
 	_looping = true;
 	_quit = false;
-	LOG_INFO <<"EventLoop "<<this<<" start looping";
+//	LOG_INFO <<"EventLoop "<<this<<" start looping";
 	while (!_quit)
 	{
 		_activeChannels.clear();
 		_pollReturnTime = _poller->poll(kPollTimeMs,&_activeChannels);
-		if (Logger::logLevel() <= Logger::TRACE)
-		{
-			printActiveChannels();
-		}
+	//	if (Logger::logLevel() <= Logger::TRACE)
+	//	{
+	//		printActiveChannels();
+	//	}
 		_eventHandling = true;
 		for (ChannelList::iterator it = _activeChannels.begin();
 			it != _activeChannels.end(); ++it)
@@ -90,7 +91,7 @@ void EventLoop::loop()
 		doPendingFunctors();
 	}
 	//::sleep(5);//::poll(NULL,0,5*1000);
-	LOG_INFO<<"EventLoop "<<this<<" stop looping";
+//	LOG_INFO<<"EventLoop "<<this<<" stop looping";
 	_looping = false;
 
 }
@@ -131,9 +132,9 @@ void EventLoop::quit()
 
 void EventLoop::abortNotInLoopThread()
 {
-	LOG_FATAL << "EventLoop::abortNotInLoopThread - EventLoop "<<this
-			  << " was created in _threadId = "<<_threadId
-			  << ", current thread id = " << CurrentThread::tid();
+//	LOG_FATAL << "EventLoop::abortNotInLoopThread - EventLoop "<<this
+//			  << " was created in _threadId = "<<_threadId
+//			  << ", current thread id = " << CurrentThread::tid();
 }
 
 void EventLoop::wakeup()
@@ -175,7 +176,7 @@ void EventLoop::printActiveChannels() const
 		it != _activeChannels.end();++it)
 	{
 		const Channel* ch = *it;
-		LOG_TRACE << "(" << ch->reventsToString() << ")";
+		//LOG_TRACE << "(" << ch->reventsToString() << ")";
 	}
 }
 

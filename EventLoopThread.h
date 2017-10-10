@@ -14,6 +14,7 @@
 #include "Condition.h"
 #include "Mutex.h"
 #include "Thread.h"
+#include "Log.h"
 
 #include <boost/noncopyable.hpp>
 //namespace muduo
@@ -29,7 +30,7 @@ class EventLoopThread : boost::noncopyable
  public:
   typedef boost::function<void(EventLoop*)> ThreadInitCallback;
 
-  EventLoopThread(const ThreadInitCallback& cb = ThreadInitCallback(),
+  EventLoopThread(ZQ::common::Log& log,const ThreadInitCallback& cb = ThreadInitCallback(),
                   const string& name = string());
   ~EventLoopThread();
   EventLoop* startLoop();
@@ -43,6 +44,7 @@ class EventLoopThread : boost::noncopyable
   MutexLock mutex_;
   Condition cond_;
   ThreadInitCallback callback_;
+  ZQ::common::Log&     _log;
 };
 
 //}

@@ -14,6 +14,7 @@
 #include <boost/noncopyable.hpp>
 #include <functional>
 #include <vector>
+#include "Log.h"
 using namespace muduo;
 class Channel;
 class Poller;
@@ -21,7 +22,7 @@ class EventLoop : boost::noncopyable
 {
 public:
 	typedef std::function<void()> Functor;	
-	EventLoop();
+	EventLoop(ZQ::common::Log& log);
 	~EventLoop();
 	void loop();
 	void quit();
@@ -62,7 +63,7 @@ private:
 
 	mutable MutexLock    _mutex;
 	std::vector<Functor> _pendingFunctors;
-
+	ZQ::common::Log&     _log;
 };
 
 
