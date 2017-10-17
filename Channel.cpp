@@ -27,6 +27,7 @@ Channel::Channel(EventLoop* loop, int fd, ZQ::common::Log& log)
 	_log(log)
 {
 //	LOG_INFO << "Channel  loop: " << _loop;
+	_log(ZQ::common::Log::L_DEBUG,CLOGFMT(Channel,"Channel::Channel created[%p]"),this);
 }
 
 Channel::~Channel()
@@ -77,6 +78,7 @@ void Channel::handleEvent(Timestamp receiveTime)
 
 void Channel::handleEventWithGuard(Timestamp receiveTime)
 {
+	_log(ZQ::common::Log::L_DEBUG,CLOGFMT(Channel,"handleEventWithGuard"));
 	_eventHandling = true;
 	LOG_TRACE << reventsToString();
 	if ( (_revents & POLLHUP) && !(_revents & POLLIN))

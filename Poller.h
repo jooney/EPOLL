@@ -4,6 +4,7 @@
 #include "EventLoop.h"
 #include <vector>
 #include <map>
+#include "Log.h"
 class Channel;
 using namespace muduo;
 class Poller
@@ -16,7 +17,7 @@ class Poller
 		virtual void updateChannel(Channel* channel) = 0;
 		virtual void removeChannel(Channel* channel) = 0;
 		virtual bool hasChannel(Channel*channel) const;
-		static Poller* newDefaultPoller(EventLoop* loop);
+		static Poller* newDefaultPoller(EventLoop* loop,ZQ::common::Log& log);
 		void assertInLoopThread() const
 		{
 			_ownerLoop->assertInLoopThread();

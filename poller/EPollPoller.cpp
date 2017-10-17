@@ -17,10 +17,11 @@ BOOST_STATIC_ASSERT(EPOLLRDHUP == POLLRDHUP);
 BOOST_STATIC_ASSERT(EPOLLERR == POLLERR);
 BOOST_STATIC_ASSERT(EPOLLHUP == POLLHUP);
 
-EPollPoller::EPollPoller(EventLoop* loop)
+EPollPoller::EPollPoller(EventLoop* loop,ZQ::common::Log& log)
 	:Poller(loop),
 	_epollfd(::epoll_create(EPOLL_CLOEXEC)),
-	_events(kInitEventListSize)
+	_events(kInitEventListSize),
+	_log(log)
 {
 	if (_epollfd < 0)
 	{

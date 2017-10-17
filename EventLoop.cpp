@@ -28,14 +28,16 @@ EventLoop::EventLoop(ZQ::common::Log& log)
 	 _callingPendingFunctors(false),
 	 _threadId(CurrentThread::tid()),
 	 _currentActiveChannel(NULL),
-	 _poller(Poller::newDefaultPoller(this)),
+	 _poller(Poller::newDefaultPoller(this,log)),
 	 _log(log)
 {
 	//LOG_DEBUG << "EventLoop created"<<this<<" in thread "<<_threadId;
+	_log(ZQ::common::Log::L_DEBUG,CLOGFMT(EventLoop,"EventLoop created[%p]"),this);
 	if (t_loopInThisThread)
 	{
 	//	LOG_FATAL << "Another EventLoop "<<t_loopInThisThread
 	//		      << " exists in this thread "<<_threadId;
+	_log(ZQ::common::Log::L_ERROR,CLOGFMT(EventLoop,"Another EventLoop exists in this thread"));
 	}
 	else
 	{
@@ -47,6 +49,7 @@ EventLoop::~EventLoop()
 {
 //	LOG_DEBUG<<"EventLoop "<<this<<" of thread "<<_threadId
 //		     <<" destructs in thread "<<CurrentThread::tid();
+	_log(ZQ::common::Log::L_DEBUG,CLOGFMT(EventLoop,"EventLoop::~EventLoop[%p]"),this);
 	t_loopInThisThread = NULL;
 }
 
@@ -71,6 +74,7 @@ void EventLoop::loop()
 	_looping = true;
 	_quit = false;
 //	LOG_INFO <<"EventLoop "<<this<<" start looping";
+	_log(ZQ::common::Log::L_DEBUG,CLOGFMT(EventLoop,"EventLoop start looping[%p]"),this);
 	while (!_quit)
 	{
 		_activeChannels.clear();
@@ -92,6 +96,7 @@ void EventLoop::loop()
 	}
 	//::sleep(5);//::poll(NULL,0,5*1000);
 //	LOG_INFO<<"EventLoop "<<this<<" stop looping";
+	_log(ZQ::common::Log::L_DEBUG,CLOGFMT(EventLoop,"EventLoop stop looping[%p]"),this);
 	_looping = false;
 
 }

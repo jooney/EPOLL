@@ -9,7 +9,7 @@ struct epoll_event;
 class EPollPoller : public Poller
 {
 	public:
-		EPollPoller(EventLoop* loop);
+		EPollPoller(EventLoop* loop,ZQ::common::Log& log);
 		virtual ~EPollPoller();
 		virtual Timestamp poll(int timeoutMs,ChannelList* activeChannels);
 		virtual void updateChannel(Channel* channel);
@@ -23,6 +23,7 @@ class EPollPoller : public Poller
 		typedef std::vector<struct epoll_event> EventList;
 		int _epollfd;
 		EventList _events;
+		ZQ::common::Log&   _log;
 };
 
 #endif
