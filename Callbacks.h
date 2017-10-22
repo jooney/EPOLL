@@ -17,6 +17,7 @@
 #include <memory>
 
 #include "Timestamp.h"
+using namespace muduo;
 
 //namespace muduo
 //{
