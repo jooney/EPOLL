@@ -21,7 +21,8 @@ class Timer
 			_callback();
 		}
 		Timestamp expiration() const {return _expiration;}
-		bool  repeat() const {return _sequence;}
+		bool  repeat() const {return _repeat;}
+		int64_t  sequence() const {return _sequence;}
 		void  restart(Timestamp now);
 		static int64_t  numCreated() {return _s_numCreated.get();}
 	private:

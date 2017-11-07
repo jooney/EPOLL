@@ -17,6 +17,7 @@
 using namespace muduo;
 class Channel;
 class Poller;
+class TimerQueue;
 class EventLoop : boost::noncopyable
 {
 public:
@@ -57,6 +58,7 @@ private:
 	int _wakeupFd;
 //	boost::scoped_ptr<Channel> _wakeupChannel;
 	boost::scoped_ptr<Poller> _poller;
+//	boost::scoped_ptr<TimerQueue> _timeQueue;
 	ChannelList _activeChannels;
 	Channel*    _currentActiveChannel;
 

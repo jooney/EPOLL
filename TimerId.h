@@ -14,7 +14,7 @@ class TimerId
 			:_timer(timer),
 			_sequence(seq)
 	{}
-		friend class TimeQueue;
+	friend class TimerQueue;
 	private:
 		Timer*     _timer;
 		int64_t    _sequence;
