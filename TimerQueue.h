@@ -34,6 +34,7 @@ class TimerQueue
 		bool  insert(Timer* timer);
 
 		std::vector<Entry> getExpired(Timestamp now);
+		void reset(const std::vector<Entry>& expired, Timestamp now);
 		
 		EventLoop*   _loop;
 		const int    _timerfd;

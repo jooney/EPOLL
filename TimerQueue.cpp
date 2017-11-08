@@ -150,12 +150,63 @@ void TimerQueue::handleRead()
 	_loop->assertInLoopThread();
 	Timestamp now(Timestamp::now());
 	readTimerfd(_timerfd,now);
+	std::vector<Entry> expired = getExpired(now);
+	_callingExpiredTimers = true;
+	_cancelingTimers.clear();
+	for (std::vector<Entry>::iterator it = expired.begin();
+		it != expired.end();++it)
+	{
+		it->second->run();
+	}
+	_callingExpiredTimers = false;
+	//reset(expired,now);
 }
 
 std::vector<TimerQueue::Entry> TimerQueue::getExpired(Timestamp now)
 {
 	assert(_timers.size() == _activeTimers.size());
 	std::vector<TimerQueue::Entry> expired;
+	Entry sentry(now, reinterpret_cast<Timer*>(UINTPTR_MAX));
+	TimerList::iterator end = _timers.lower_bound(sentry);
+	assert(end == _timers.end() || now < end->first);
+	std::copy(_timers.begin(),end,back_inserter(expired));
+	for (std::vector<Entry>::iterator it = expired.begin();
+		it != expired.end();++it)
+	{
+		ActiveTimer timer(it->second, it->second->sequence());
+		size_t n = _activeTimers.erase(timer);
+		assert(n == 1); (void)n;
+	}
+	assert(_timers.size() == _activeTimers.size());
+	return expired;
 }
 
+//if timer is repeat , so put back to _timers 
+void TimerQueue::reset(const std::vector<Entry>& expired, Timestamp now)
+{
+	Timestamp nextExpire;
+	for (std::vector<Entry>::const_iterator it = expired.begin();
+		it != expired.end(); ++it)
+	{
+		ActiveTimer timer(it->second, it->second->sequence());
+		if (it->second->repeat()
+			&& _cancelingTimers.find(timer) == _cancelingTimers.end())
+		{
+			it->second->restart(now);
+			insert(it->second);
+		}
+		else
+		{
+			delete it->second;
+		}
+	}
+	if (!_timers.empty())
+	{
+		nextExpire = _timers.begin()->second->expiration();
+	}
+	if (nextExpire.valid())
+	{
+		resetTimerfd(_timerfd,nextExpire);
+	}
+}
 
